@@ -1,7 +1,7 @@
 // Package canvas provides GopherJS bindings for the JavaScript canvas APIs.
 //
 // Code mainly borrowed from honnef.co/go/js/dom by Dominik Honnef in order to
-// to a separated wrapper of the JavaScript canvas API.
+// be a separated wrapper of the JavaScript canvas API.
 package canvas
 
 import (
@@ -12,7 +12,6 @@ type CanvasRenderingContext2D struct {
 	js.Object
 
 	// Colors, Styles, and Shadows
-
 	FillStyle     string `js:"fillStyle"`
 	StrokeStyle   string `js:"strokeStyle"`
 	ShadowColor   string `js:"shadowColor"`
@@ -21,20 +20,17 @@ type CanvasRenderingContext2D struct {
 	ShadowOffsetY int    `js:"shadowOffsetY"`
 
 	// Line Styles
-
 	LineCap    string `js:"lineCap"`
 	LineJoin   string `js:"lineJoin"`
 	LineWidth  int    `js:"lineWidth"`
 	MiterLimit int    `js:"miterLimit"`
 
 	// Text
-
 	Font         string `js:"font"`
 	TextAlign    string `js:"textAlign"`
 	TextBaseline string `js:"textBaseline"`
 
 	// Compositing
-
 	GlobalAlpha              float64 `js:"globalAlpha"`
 	GlobalCompositeOperation string  `js:"globalCompositeOperation"`
 }
