@@ -112,6 +112,7 @@ const (
 
 var (
 	document = js.Global.Get("document")
+	Doc      = &Element{Object: document}
 	Body     = &Element{Object: document.Get("body")}
 )
 
