@@ -8,12 +8,6 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-type HTMLCanvasElement struct {
-	js.Object
-	// Height int `js:"height"`
-	// Width  int `js:"width"`
-}
-
 type CanvasRenderingContext2D struct {
 	js.Object
 
@@ -45,12 +39,8 @@ type CanvasRenderingContext2D struct {
 	GlobalCompositeOperation string  `js:"globalCompositeOperation"`
 }
 
-func New(obj js.Object) *HTMLCanvasElement {
-	return &HTMLCanvasElement{obj}
-}
-
-func (e *HTMLCanvasElement) GetContext2d() *CanvasRenderingContext2D {
-	ctx := e.Call("getContext", "2d")
+func NewContext2D(el js.Object) *CanvasRenderingContext2D {
+	ctx := el.Call("getContext", "2d")
 	return &CanvasRenderingContext2D{Object: ctx}
 }
 
