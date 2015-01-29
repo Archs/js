@@ -1,3 +1,4 @@
+// package JSON wraps the javascritp JSON api for GOPHERJS.
 package JSON
 
 import (
