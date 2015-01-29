@@ -1,3 +1,4 @@
+// package localStorage wraps the javascritp localStorage api for GOPHERJS.
 package localStorage
 
 import (
