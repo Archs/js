@@ -1,3 +1,7 @@
+// Package canvas provides GopherJS bindings for the JavaScript canvas APIs.
+//
+// Code mainly borrowed from honnef.co/go/js/dom by Dominik Honnef in order to
+// to a separated wrapper of the JavaScript canvas API.
 package canvas
 
 import (
