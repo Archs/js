@@ -1,5 +1,4 @@
-// Package dom is a thin wrapper of some useful dom functions.
-
+// Package dom is a thin wrapper of some useful dom functions for gopherjs.
 package dom
 
 import (
