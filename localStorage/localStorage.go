@@ -13,6 +13,11 @@ func SetItem(key string, val string) {
 	localStorage.Call("setItem", key, val)
 }
 
+// Return "" when no key found
 func GetItem(key string) string {
-	return localStorage.Call("getItem", key).String()
+	obj := localStorage.Call("getItem", key)
+	if obj == nil {
+		return ""
+	}
+	return obj.String()
 }
