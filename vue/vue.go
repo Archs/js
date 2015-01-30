@@ -131,38 +131,38 @@ func NextTick(callback func()) {
 
 // struct literal not workable yet, using js.M to do initialization
 // 	vm := vue.New(js.M{
-// 			"el": "#demo",
-// 			"data": js.M{
-// 				"title": "todos",
-// 				"todos": []js.M{
-// 					js.M{
-// 						"done":    true,
-// 						"content": "Learn JavaScript",
-// 					},
-// 					js.M{
-// 						"done":    false,
-// 						"content": "Learn Vue.js",
-// 					},
+// 		"el": "#demo",
+// 		"data": js.M{
+// 			"title": "todos",
+// 			"todos": []js.M{
+// 				js.M{
+// 					"done":    true,
+// 					"content": "Learn JavaScript",
+// 				},
+// 				js.M{
+// 					"done":    false,
+// 					"content": "Learn Vue.js",
 // 				},
 // 			},
-// 			"directives": js.M{
-// 				"showdone": func(v js.Object) {
-// 					println(v)
-// 					println("this.expression:", js.This.Get("expression"))
-// 				},
+// 		},
+// 		"directives": js.M{
+// 			"showdone": func(v js.Object) {
+// 				println(v)
+// 				println("this.expression:", js.This.Get("expression"))
 // 			},
-// 			"filters": js.M{
-// 				"testf": func(v js.Object) js.Object {
-// 					println("testf:", v, js.This.Get("title"))
-// 					return v
-// 				},
+// 		},
+// 		"filters": js.M{
+// 			"testf": func(v js.Object) js.Object {
+// 				println("testf:", v, js.This.Get("title"))
+// 				return v
 // 			},
-// 			"created": func() {
-// 				js.This.Call("$on", "msg", func(msg interface{}) {
-// 					println("parent got:", msg.(string))
-// 				})
-// 			},
-// 		})
+// 		},
+// 		"created": func() {
+// 			js.This.Call("$on", "msg", func(msg interface{}) {
+// 				println("parent got:", msg.(string))
+// 			})
+// 		},
+// 	)
 func New(opts js.M) *Vue {
 	vm := vue.New(opts)
 	return &Vue{
