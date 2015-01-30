@@ -35,7 +35,7 @@ func main() {
 		"directives": js.M{
 			"showdone": func(v js.Object) {
 				println(v)
-				println("this.expression2->", js.This.Get("expression"))
+				println("this.expression:", js.This.Get("expression"))
 			},
 		},
 		"filters": js.M{

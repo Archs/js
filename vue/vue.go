@@ -130,7 +130,7 @@ func NextTick(callback func()) {
 }
 
 // struct literal not workable yet, using js.M to do initialization
-// 		vm := vue.New(js.M{
+// 	vm := vue.New(js.M{
 // 			"el": "#demo",
 // 			"data": js.M{
 // 				"title": "todos",
@@ -144,6 +144,23 @@ func NextTick(callback func()) {
 // 						"content": "Learn Vue.js",
 // 					},
 // 				},
+// 			},
+// 			"directives": js.M{
+// 				"showdone": func(v js.Object) {
+// 					println(v)
+// 					println("this.expression:", js.This.Get("expression"))
+// 				},
+// 			},
+// 			"filters": js.M{
+// 				"testf": func(v js.Object) js.Object {
+// 					println("testf:", v, js.This.Get("title"))
+// 					return v
+// 				},
+// 			},
+// 			"created": func() {
+// 				js.This.Call("$on", "msg", func(msg interface{}) {
+// 					println("parent got:", msg.(string))
+// 				})
 // 			},
 // 		})
 func New(opts js.M) *Vue {
