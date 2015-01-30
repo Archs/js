@@ -89,36 +89,34 @@ func Partial(name, definition string) {
 // Register or retrieve a global JavaScript transition effect definition.
 // For more details see the guide for JavaScript Transitions.
 // Example:
-// Vue.transition('fade', {
-//   beforeEnter: function (el) {
-//     // a synchronous function called right before the
-//     // element is inserted into the document.
-//     // you can do some pre-styling here to avoid
-//     // FOC (flash of content).
-//   },
-//   enter: function (el, done) {
-//     // element is already inserted into the DOM
-//     // call done when animation finishes.
-//     $(el)
-//       .css('opacity', 0)
-//       .animate({ opacity: 1 }, 1000, done)
-//     // optionally return a "cancel" function
-//     // to clean up if the animation is cancelled
-//     return function () {
-//       $(el).stop()
-//     }
-//   },
-//   leave: function (el, done) {
-//     // same as enter
-//     $(el).animate({ opacity: 0 }, 1000, done)
-//     return function () {
-//       $(el).stop()
-//     }
-//   }
-// })
+// 		Vue.transition('fade', {
+// 		  beforeEnter: function (el) {
+// 		    // a synchronous function called right before the
+// 		    // element is inserted into the document.
+// 		    // you can do some pre-styling here to avoid
+// 		    // FOC (flash of content).
+// 		  },
+// 		  enter: function (el, done) {
+// 		    // element is already inserted into the DOM
+// 		    // call done when animation finishes.
+// 		    $(el)
+// 		      .css('opacity', 0)
+// 		      .animate({ opacity: 1 }, 1000, done)
+// 		    // optionally return a "cancel" function
+// 		    // to clean up if the animation is cancelled
+// 		    return function () {
+// 		      $(el).stop()
+// 		    }
+// 		  },
+// 		  leave: function (el, done) {
+// 		    // same as enter
+// 		    $(el).animate({ opacity: 0 }, 1000, done)
+// 		    return function () {
+// 		      $(el).stop()
+// 		    }
+// 		  }
+// 		})
 // Then you can use it by providing the transition id to v-transition. Note this has higher priority than CSS transitions.
-
-// 1
 // <p v-transition="fade"></p>
 func Transition(name string, definition js.M) {
 	vue.Call("transition", name, definition)
@@ -132,22 +130,22 @@ func NextTick(callback func()) {
 }
 
 // struct literal not workable yet, using js.M to do initialization
-// vm := vue.New(js.M{
-// 	"el": "#demo",
-// 	"data": js.M{
-// 		"title": "todos",
-// 		"todos": []js.M{
-// 			js.M{
-// 				"done":    true,
-// 				"content": "Learn JavaScript",
+// 		vm := vue.New(js.M{
+// 			"el": "#demo",
+// 			"data": js.M{
+// 				"title": "todos",
+// 				"todos": []js.M{
+// 					js.M{
+// 						"done":    true,
+// 						"content": "Learn JavaScript",
+// 					},
+// 					js.M{
+// 						"done":    false,
+// 						"content": "Learn Vue.js",
+// 					},
+// 				},
 // 			},
-// 			js.M{
-// 				"done":    false,
-// 				"content": "Learn Vue.js",
-// 			},
-// 		},
-// 	},
-// })
+// 		})
 func New(opts js.M) *Vue {
 	vm := vue.New(opts)
 	return &Vue{
