@@ -1,0 +1,50 @@
+<div id="demo">
+  <h1>{{title | uppercase}}</h1>
+  <ul>
+    <li
+      v-repeat="todos"
+      v-on="click: done = !done"
+      v-showdone="done | testf"
+      class="{{done ? 'done' : ''}}">
+      {{content}}
+    </li>
+  </ul>
+
+  <div v-component="my-cpnt">
+    asdfasdf
+  </div>
+
+  <my-cpnt></my-cpnt>
+</div>
+
+<style type="text/css">
+  body {
+    font-family: Helvetica Neue, Arial, sans-serif;
+}
+
+li.done {
+    text-decoration: line-through;
+}
+</style>
+
+<script type="text/javascript" src="vendor/vue.js"></script>
+
+<script type="text/javascript" src="app.js">
+//  var demo = new Vue({
+//   el: '#demo',
+//   data: {
+//     title: 'todos',
+//     todos: [
+//       {
+//         done: true,
+//         content: 'Learn JavaScript'
+//       },
+//       {
+//         done: false,
+//         content: 'Learn Vue.js'
+//       }
+//     ]
+//   }
+// }) 
+</script>
+
