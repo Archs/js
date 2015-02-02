@@ -166,9 +166,6 @@ func NextTick(callback func()) {
 //
 // Options
 //
-// We connect highly qualified audiences with highly relevant services, products, and brands.
-// ads via Carbon
-//
 // Data
 //
 // data
