@@ -506,8 +506,15 @@ func (v *Vue) Filter(name string, fn interface{}) *Vue {
 
 type Unwatcher func()
 
-// 你可以监控Vue实例上的数据。注意所有的监控回调是异步的。另外的，修改值再一个事件循环中批量进行的。这就是说在一个事件循环中一个值修改了多次，回调函数只会带最新的值调用一次。
 // vm.$watch( expression, callback, [deep, immediate] )
+//
+// expression String
+// callback( newValue, oldValue ) Function
+// deep Boolean optional
+// immdediate Boolean optional
+//
+// Watch an expression on the Vue instance for changes.
+// The expression can be a single keypath or actual expressions:
 func (v *Vue) Watch(expression string, callback func(newVal, oldVal js.Object), deepWatch bool) Unwatcher {
 	obj := v.Call("$watch", expression, callback, deepWatch)
 	return func() {
@@ -516,19 +523,77 @@ func (v *Vue) Watch(expression string, callback func(newVal, oldVal js.Object), 
 }
 
 // vm.$eval( expression )
+//
 // expression String
-// 计算可以包含过滤器的表达式
+// Evaluate an expression that can also contain filters.
+//
+// // assuming vm.msg = 'hello'
+// vm.$eval('msg | uppercase') // -> 'HELLO'
 func (v *Vue) Eval(expression string) js.Object {
 	return v.Call("$eval", expression)
 }
 
-// Events
-// 每个vm也是一个时间触发器。当你有多个嵌套的VM，你可以使用事件系统在它们之间沟通。
+// vm.$get( expression )
+//
+// expression String
+//
+// Retrieve a value from the Vue instance given an expression.
+// Expressions that throw errors will be suppressed and return undefined.
+func (v *Vue) Get(expression string) {
+	v.Call("$get", expression)
+}
 
+// vm.$set( keypath, value )
+
+// keypath String
+// value *
+//
+// Set a data value on the Vue instance given a valid keypath.
+// If the path doesn’t exist it will be created.
+func (v *Vue) Set(keypath string, val interface{}) {
+	v.Call("$set", keypath, val)
+}
+
+// vm.$add( keypath, value )
+//
+// keypath String
+// value *
+// Add a root level property to the Vue instance (and also its $data). Due to the limitations of ES5, Vue cannot detect properties directly added to or deleted from an Object, so use this method and vm.$delete when you need to do so. Additionally, all observed objects are augmented with these two methods too.
+func (v *Vue) Add(keypath string, val interface{}) {
+	v.Call("$add", keypath, val)
+}
+
+// vm.$delete( keypath )
+//
+// keypath String
+// Delete a root level property on the Vue instance (and also its $data).
+func (v *Vue) Delete(keypath string) {
+	v.Call("$delete", keypath)
+}
+
+// vm.$interpolate( templateString )
+// templateString String
+// Evaluate a piece of template string containing mustache interpolations.
+// Note that this method simply performs string interpolation;
+// attribute directives are not compiled.
+//
+// // assuming vm.msg = 'hello'
+// vm.$interpolate('{{msg}} world!') // -> 'hello world!'
+func (v *Vue) Interpolate(templateString string) {
+	v.Call("$interpolate", templateString)
+}
+
+// Events
+// Each vm is also an event emitter.
+// When you have multiple nested ViewModels,
+// you can use the event system to communicate between them.
+//
 // vm.$dispatch( event, [args…] )
 // event String
 // args… optional
-// 从当前vm分发一个消息到它的父元素。如果回调函数返回false。将会停止传播。
+//
+// Dispatch an event from the current vm that propagates all the way up to its $root.
+// If a callback returns false, it will stop the propagation at its owner instance.
 func (v *Vue) Dispatch(event string, args interface{}) {
 	v.Call("$dispatch", event, args)
 }
@@ -536,7 +601,10 @@ func (v *Vue) Dispatch(event string, args interface{}) {
 // vm.$broadcast( event, [args…] )
 // event String
 // args… optional
-// 给所以的子VM广播一条消息，如果返回false，就不在继续往下广播。
+//
+// Emit an event to all children vms of the current vm,
+// which gets further broadcasted to their children all the way down.
+// If a callback returns false, its owner instance will not broadcast the event any further.
 func (v *Vue) Broadcast(event string, args interface{}) {
 	v.Call("$broadcast", event, args)
 }
@@ -544,7 +612,8 @@ func (v *Vue) Broadcast(event string, args interface{}) {
 // vm.$emit( event, [args…] )
 // event String
 // args… optional
-// 触发一条消息给自己。
+//
+// Trigger an event on this vm only.
 func (v *Vue) Emit(event string, args interface{}) {
 	v.Call("$emit", event, args)
 }
@@ -554,7 +623,8 @@ type EventCallback func(args interface{})
 // vm.$on( event, callback )
 // event String
 // callback Function
-// 在当前的VM上监听消息。
+//
+// Listen for an event on the current vm
 func (v *Vue) On(event string, cb EventCallback) {
 	v.Call("$on", event, cb)
 }
@@ -562,7 +632,8 @@ func (v *Vue) On(event string, cb EventCallback) {
 // vm.$once( event, callback )
 // event String
 // callback Function
-// 监听一次性消息。
+//
+// Attach a one-time only listener for an event.
 func (v *Vue) Once(event string, cb EventCallback) {
 	v.Call("$once", event, cb)
 }
@@ -570,7 +641,10 @@ func (v *Vue) Once(event string, cb EventCallback) {
 // vm.$off( [event, callback] )
 // event String optional
 // callback Function optional
-// 如果没有参数，就停止接监听一切消息；如果只有消息给出，删除所有的回调函数；如果既有消息又有回调，就只删除指定的这个回调。
+//
+// If no arguments are given, stop listening for all events;
+// if only the event is given, remove all callbacks for that event;
+// if both event and callback are given, remove that specific callback only.
 func (v *Vue) OffEvent(event string) {
 	v.Call("$off", event)
 }
@@ -638,9 +712,26 @@ func (v *Vue) Compile(element string) {
 // vm.$addChild( [options, constructor] )
 // options Object optional
 // constructor Function optional
-// Adds a child instance to the current instance. The options object is the same in manually instantiating an instance. Optionally you can pass in a constructor created from Vue.extend().
-
+//
+// Adds a child instance to the current instance.
+// The options object is the same in manually instantiating an instance.
+// Optionally you can pass in a constructor created from Vue.extend().
+//
 // There are three implications of a parent-child relationship between instances:
 // The parent and child can communicate via the event system.
 // The child has access to all parent assets (e.g. custom directives).
 // The child, if inheriting parent scope, has access to parent scope data properties.
+func (v *Vue) AddChild(options js.M) {
+	v.Call("$addChild", options)
+}
+
+// vm.$log( [keypath] )
+//
+// keypath String optional
+// Log the current instance data as a plain object, which is more console-inspectable than a bunch of getter/setters. Also accepts an optional key.
+//
+// vm.$log() // logs entire ViewModel data
+// vm.$log('item') // logs vm.item
+func (v *Vue) Log() {
+	v.Call("$log")
+}
