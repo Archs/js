@@ -489,20 +489,20 @@ func New(opts js.M) *Vue {
 	}
 }
 
-func (v *Vue) Directive(name string, opt js.M) *Vue {
-	v.Call("directive", name, opt)
-	return v
-}
+// func (v *Vue) Directive(name string, opt js.M) *Vue {
+// 	v.Call("directive", name, opt)
+// 	return v
+// }
 
-func (v *Vue) Component(name string, opt js.M) *Vue {
-	v.Call("component", name, opt)
-	return v
-}
+// func (v *Vue) Component(name string, opt js.M) *Vue {
+// 	v.Call("component", name, opt)
+// 	return v
+// }
 
-func (v *Vue) Filter(name string, fn interface{}) *Vue {
-	v.Call("filter", name, fn)
-	return v
-}
+// func (v *Vue) Filter(name string, fn interface{}) *Vue {
+// 	v.Call("filter", name, fn)
+// 	return v
+// }
 
 type Unwatcher func()
 
