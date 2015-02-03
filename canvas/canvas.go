@@ -45,7 +45,7 @@ type CanvasRenderingContext2D struct {
 }
 
 // el is then html element
-func NewCanvas(el js.Object) *CanvasElement {
+func NewElement(el js.Object) *CanvasElement {
 	return &CanvasElement{Object: el}
 }
 
