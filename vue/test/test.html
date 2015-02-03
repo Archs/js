@@ -1,4 +1,4 @@
-<div id="demo">
+<div id="demo" v-cloak>
   <h1>{{title | uppercase}}</h1>
   <ul>
     <li
@@ -15,12 +15,16 @@
   </div>
 
   <my-cpnt></my-cpnt>
+
+  <js-clock width=150 height=150></js-clock>
 </div>
 
 <style type="text/css">
-  body {
-    font-family: Helvetica Neue, Arial, sans-serif;
+body {
+  font-family: Helvetica Neue, Arial, sans-serif;
 }
+
+[v-cloak] { display: none }
 
 li.done {
     text-decoration: line-through;
@@ -30,21 +34,5 @@ li.done {
 <script type="text/javascript" src="vendor/vue.js"></script>
 
 <script type="text/javascript" src="app.js">
-//  var demo = new Vue({
-//   el: '#demo',
-//   data: {
-//     title: 'todos',
-//     todos: [
-//       {
-//         done: true,
-//         content: 'Learn JavaScript'
-//       },
-//       {
-//         done: false,
-//         content: 'Learn Vue.js'
-//       }
-//     ]
-//   }
-// }) 
 </script>
 
