@@ -4,12 +4,13 @@ package main
 
 import (
 	"github.com/Archs/js/vue"
+	_ "github.com/Archs/js/vue/components/js-clock"
 	"github.com/gopherjs/gopherjs/js"
 )
 
 func main() {
 	vue.Component("my-cpnt", js.M{
-		"template": "<h1>This is my fucking component!</h1>" +
+		"template": "<h1>This is my testing component!</h1>" +
 			"<content>This will only be displayed if no content is inserted</content>",
 		"created": func() {
 			println("'An instance of MyComponent has been created!'")
