@@ -118,11 +118,16 @@ var (
 
 type Element struct {
 	js.Object
-	Id                     string   `js:"id"`
-	InnerHTML              string   `js:"innerHTML"`
-	InnerText              string   `js:"innerText"`
-	TagName                string   `js:"tagName"`
-	ContentEditable        bool     `js:"contentEditable"`
+	// basic attr
+	Id              string `js:"id"`
+	InnerHTML       string `js:"innerHTML"`
+	InnerText       string `js:"innerText"`
+	TagName         string `js:"tagName"`
+	ContentEditable bool   `js:"contentEditable"`
+	// width & height
+	Width  int `js:"width"`
+	Height int `js:"height"`
+	// dom
 	PreviousElementSibling *Element `js:"previousElementSibling"`
 	NextElementSibling     *Element `js:"nextElementSibling"`
 	FirstElementChild      *Element `js:"firstElementChild"`
@@ -137,6 +142,10 @@ func CreateElement(tagName string) *Element {
 func GetElementById(id string) *Element {
 	obj := document.Call("getElementById", id)
 	return &Element{Object: obj}
+}
+
+func HtmlElement(el js.Object) *Element {
+	return &Element{Object: el}
 }
 
 func Alert(msg string) {
