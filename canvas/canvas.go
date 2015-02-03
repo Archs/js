@@ -8,6 +8,15 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
+type CanvasElement struct {
+	js.Object
+	// basic attr
+	Id string `js:"id"`
+	// width & height
+	Width  int `js:"width"`
+	Height int `js:"height"`
+}
+
 type CanvasRenderingContext2D struct {
 	js.Object
 
@@ -35,9 +44,25 @@ type CanvasRenderingContext2D struct {
 	GlobalCompositeOperation string  `js:"globalCompositeOperation"`
 }
 
-func NewContext2D(el js.Object) *CanvasRenderingContext2D {
-	ctx := el.Call("getContext", "2d")
+// el is then html element
+func NewCanvas(el js.Object) *CanvasElement {
+	return &CanvasElement{Object: el}
+}
+
+func (c *CanvasElement) GetContext2D() *CanvasRenderingContext2D {
+	ctx := c.Call("getContext", "2d")
 	return &CanvasRenderingContext2D{Object: ctx}
+}
+
+// canvas.toDataURL("image/jpeg") or canvas.toDataURL()
+func (c *CanvasElement) ToDataUrl(mimeType ...string) string {
+	var o js.Object
+	if len(mimeType) == 0 {
+		o = c.Call("toDataURL")
+	} else {
+		o = c.Call("toDataURL", mimeType)
+	}
+	return o.String()
 }
 
 // Colors, Styles, and Shadows
@@ -154,4 +179,14 @@ func (ctx *CanvasRenderingContext2D) StrokeText(text string, x, y, maxWidth int)
 	}
 
 	ctx.Call("strokeText", text, x, y, maxWidth)
+}
+
+// canvas state
+
+func (ctx *CanvasRenderingContext2D) Save() {
+	ctx.Call("save")
+}
+
+func (ctx *CanvasRenderingContext2D) Restore() {
+	ctx.Call("restore")
 }
