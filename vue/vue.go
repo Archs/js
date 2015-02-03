@@ -130,6 +130,7 @@ func NextTick(callback func()) {
 }
 
 // struct literal not workable yet, using js.M to do initialization
+// Example:
 // 	vm := vue.New(js.M{
 // 		"el": "#demo",
 // 		"data": js.M{
