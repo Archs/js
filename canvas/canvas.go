@@ -5,16 +5,12 @@
 package canvas
 
 import (
+	"github.com/Archs/js/dom"
 	"github.com/gopherjs/gopherjs/js"
 )
 
 type CanvasElement struct {
-	js.Object
-	// basic attr
-	Id string `js:"id"`
-	// width & height
-	Width  int `js:"width"`
-	Height int `js:"height"`
+	dom.Element
 }
 
 type CanvasRenderingContext2D struct {
@@ -46,7 +42,7 @@ type CanvasRenderingContext2D struct {
 
 // el is then html element
 func NewElement(el js.Object) *CanvasElement {
-	return &CanvasElement{Object: el}
+	return &CanvasElement{dom.Element{Object: el}}
 }
 
 func (c *CanvasElement) GetContext2D() *CanvasRenderingContext2D {
