@@ -2,6 +2,7 @@ package clock
 
 import (
 	"github.com/Archs/js/canvas"
+	"github.com/Archs/js/dom"
 	"github.com/Archs/js/vue"
 	"github.com/gopherjs/gopherjs/js"
 	"math"
@@ -72,6 +73,11 @@ func drawNiddles(ctx *canvas.CanvasRenderingContext2D, r int) {
 }
 
 func draw(el *canvas.CanvasElement) {
+	// event test
+	el.AddEventListener("mousemove", true, func(ev *dom.Event) {
+		println("mouse:", ev.MovementX, ev.MovementY)
+	})
+	// draw
 	ctx := el.GetContext2D()
 	width := 100
 	height := 100
