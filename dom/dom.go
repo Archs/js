@@ -117,7 +117,7 @@ var (
 )
 
 type Element struct {
-	js.Object
+	*js.Object
 	// basic attr
 	Id              string `js:"id"`
 	InnerHTML       string `js:"innerHTML"`
@@ -144,7 +144,7 @@ func GetElementById(id string) *Element {
 	return &Element{Object: obj}
 }
 
-func HtmlElement(el js.Object) *Element {
+func HtmlElement(el *js.Object) *Element {
 	return &Element{Object: el}
 }
 
@@ -168,7 +168,7 @@ func (e *Element) SetAttribute(attr string, val interface{}) {
 	e.Call("setAttribute", attr, val)
 }
 
-func (e *Element) GetAttribute(attr string) js.Object {
+func (e *Element) GetAttribute(attr string) *js.Object {
 	return e.Call("getAttribute", attr)
 }
 
@@ -193,7 +193,7 @@ func (e *Element) QuerySelectorAll(sel string) []*Element {
 // Type Event implements the Event interface and is embedded by
 // concrete event types.
 type Event struct {
-	js.Object
+	*js.Object
 	// close event
 	Code     int    `js:"code"`
 	Reason   string `js:"reason"`
@@ -277,8 +277,8 @@ func (ev *Event) ModifierState(mod string) bool {
 	return ev.Call("getModifierState", mod).Bool()
 }
 
-func (e *Element) AddEventListener(typ string, useCapture bool, listener func(*Event)) func(js.Object) {
-	wrapper := func(o js.Object) {
+func (e *Element) AddEventListener(typ string, useCapture bool, listener func(*Event)) func(*js.Object) {
+	wrapper := func(o *js.Object) {
 		ev := &Event{Object: o}
 		listener(ev)
 	}
@@ -286,6 +286,6 @@ func (e *Element) AddEventListener(typ string, useCapture bool, listener func(*E
 	return wrapper
 }
 
-func (e *Element) RemoveEventListener(typ string, useCapture bool, listener func(js.Object)) {
+func (e *Element) RemoveEventListener(typ string, useCapture bool, listener func(*js.Object)) {
 	e.Call("removeEventListener", typ, listener, useCapture)
 }

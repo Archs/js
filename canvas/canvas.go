@@ -14,7 +14,7 @@ type CanvasElement struct {
 }
 
 type CanvasRenderingContext2D struct {
-	js.Object
+	*js.Object
 
 	// Colors, Styles, and Shadows
 	FillStyle     string `js:"fillStyle"`
@@ -41,7 +41,7 @@ type CanvasRenderingContext2D struct {
 }
 
 // el is then html element
-func NewElement(el js.Object) *CanvasElement {
+func NewElement(el *js.Object) *CanvasElement {
 	return &CanvasElement{dom.Element{Object: el}}
 }
 
@@ -52,7 +52,7 @@ func (c *CanvasElement) GetContext2D() *CanvasRenderingContext2D {
 
 // canvas.toDataURL("image/jpeg") or canvas.toDataURL()
 func (c *CanvasElement) ToDataUrl(mimeType ...string) string {
-	var o js.Object
+	var o *js.Object
 	if len(mimeType) == 0 {
 		o = c.Call("toDataURL")
 	} else {
