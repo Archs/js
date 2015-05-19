@@ -74,7 +74,7 @@ func drawNiddles(ctx *canvas.CanvasRenderingContext2D, r int) {
 
 func draw(el *canvas.CanvasElement) {
 	// event test
-	el.AddEventListener("mousemove", true, func(ev *dom.Event) {
+	el.AddEventListener(dom.EvtMousemove, true, func(ev *dom.Event) {
 		println("mouse:", ev.MovementX, ev.MovementY)
 	})
 	// draw
