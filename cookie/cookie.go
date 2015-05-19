@@ -1,14 +1,23 @@
 package cookie
 
 import (
-	"github.com/gopherjs/gopherjs/js"
 	"strings"
 	"time"
+
+	"github.com/gopherjs/gopherjs/js"
 )
 
 var (
 	doc = js.Global.Get("document")
 )
+
+func uriDecode(str string) string {
+	return js.Global.Call("decodeURIComponent", str).String()
+}
+
+func uriEncode(str string) string {
+	return js.Global.Call("encodeURIComponent", str).String()
+}
 
 // Get returns a given cookie by name. If the cookie is not set, ok will be
 // set to false
@@ -19,9 +28,11 @@ func Get(name string) (value string, ok bool) {
 	}
 	cookiePairs := strings.Split(cookieStr, "; ")
 	for _, c := range cookiePairs {
-		cookie := strings.Split(c, "=")
-		if cookie[0] == name {
-			return cookie[1], true
+		equalIndex := strings.IndexByte(c, '=')
+		cookieName := c[:equalIndex]
+		if cookieName == name {
+			cookieValue := c[equalIndex+1:]
+			return uriDecode(cookieValue), true
 		}
 	}
 	return "", false
@@ -49,7 +60,7 @@ func Set(name string, value string, expires *time.Time, path string) {
 	if path != "" {
 		path = " path=" + path
 	}
-	c := name + "=" + value + "; " + expiry + path
+	c := name + "=" + uriEncode(value) + "; " + expiry + path
 	SetString(c)
 }
 
