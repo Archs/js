@@ -118,8 +118,9 @@ func init() {
 	vue.Component("js-clock", js.M{
 		"template": `<canvas></canvas>`,
 		"replace":  true,
-		"ready": func() {
-			draw(canvas.NewElement(js.This.Get("$el")))
-		},
+		"ready": js.MakeFunc(func(this *js.Object, arg []*js.Object) interface{} {
+			draw(canvas.NewElement(this.Get("$el")))
+			return 0
+		}),
 	})
 }

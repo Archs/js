@@ -43,25 +43,25 @@ var (
 // }
 
 type Vue struct {
-	js.Object
-	El            string    `js:"$el"`
-	Data          js.Object `js:"$data"`
-	Options       js.M      `js:"$options"`
-	Parent        js.Object `js:"$parent"`
-	Root          js.Object `js:"$root"`
-	SubComponents js.Object `js:"$"`  // v-ref, to ref sub component from parent
-	Doms          js.Object `js:"$$"` // v-el, expose dom element to Vue instance
+	*js.Object
+	El            string     `js:"$el"`
+	Data          *js.Object `js:"$data"`
+	Options       *js.M      `js:"$options"`
+	Parent        *js.Object `js:"$parent"`
+	Root          *js.Object `js:"$root"`
+	SubComponents *js.Object `js:"$"`  // v-ref, to ref sub component from parent
+	Doms          *js.Object `js:"$$"` // v-el, expose dom element to Vue instance
 }
 
 func Directive(name string, opt js.M) {
 	vue.Call("directive", name, opt)
 }
 
-func Extend(opt js.M) js.Object {
+func Extend(opt js.M) *js.Object {
 	return vue.Call("extend", opt)
 }
 
-func RegisterComponent(name string, cpnt js.Object) {
+func RegisterComponent(name string, cpnt *js.Object) {
 	vue.Call("component", name, cpnt)
 }
 
@@ -69,7 +69,7 @@ func Component(name string, opt js.M) {
 	vue.Call("component", name, opt)
 }
 
-func Filter(name string, fn func(js.Object) js.Object) {
+func Filter(name string, fn func(*js.Object) *js.Object) {
 	vue.Call("filter", name, fn)
 }
 
@@ -527,7 +527,7 @@ func (v *Vue) Watch(expression string, callback func(newVal, oldVal js.Object), 
 //
 // // assuming vm.msg = 'hello'
 // vm.$eval('msg | uppercase') // -> 'HELLO'
-func (v *Vue) Eval(expression string) js.Object {
+func (v *Vue) Eval(expression string) *js.Object {
 	return v.Call("$eval", expression)
 }
 
