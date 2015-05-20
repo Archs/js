@@ -5,6 +5,12 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
+var (
+	document = js.Global.Get("document")
+	Doc      = &Element{Object: document}
+	Body     = &Element{Object: document.Get("body")}
+)
+
 const (
 	// Wheel Delta
 	DeltaPixel = 0
@@ -18,27 +24,28 @@ const (
 	EvPhaseBubbling  = 3
 )
 
-// Events
+// Events Types
 const (
 	// Window Event Attributes
 	// Window Events triggered for a window object and apply in <body> tag
 	// Attributes	Value	Description	In HTML5?
-	EvtAfterprint   = "afterprint"   //	Script is run after the document is printed	NEW
-	EvtBeforeprint  = "beforeprint"  //	Script is run before the document is printed	NEW
-	EvtBeforeunload = "beforeunload" //	Script is run before the document is unloaded	NEW
-	EvtError        = "error"        //	Script is run when any error occur	NEW
-	EvtHaschange    = "haschange"    //	Script is run when document has changed	NEW
-	EvtLoad         = "load"         //	Event fires after the page loading finished
-	EvtMessage      = "message"      //	Script is run when document goes in offline	NEW
-	EvtOffline      = "offline"      //	Script is run when document comes in Event = "line	NEW
-	EvtPagehide     = "pagehide"     //	Script is run when document window is hidden	NEW
-	EvtPageshow     = "pageshow"     //	Script is run when document window become visible	NEW
-	EvtPopstate     = "popstate"     //	Script is run when document window history changes	NEW
-	EvtRedo         = "redo"         //	Script is run when document perform redo	NEW
-	EvtResize       = "resize"       //	Event fires when browser window is resized	NEW
-	EvtStorage      = "storage"      //	Script is run when web storage area is updated	NEW
-	EvtUndo         = "undo"         //	Script is run when document performs undo	NEW
-	EvtUnload       = "unload"       //	Event fires when browser window has been closed
+	EvtAfterprint       = "afterprint"       //	Script is run after the document is printed	NEW
+	EvtBeforeprint      = "beforeprint"      //	Script is run before the document is printed	NEW
+	EvtBeforeunload     = "beforeunload"     //	Script is run before the document is unloaded	NEW
+	EvtError            = "error"            //	Script is run when any error occur	NEW
+	EvtHaschange        = "haschange"        //	Script is run when document has changed	NEW
+	EvtLoad             = "load"             //	Event fires after the page loading finished
+	EvtDOMContentLoaded = "DOMContentLoaded" // Event fires after the page DOM is ready
+	EvtMessage          = "message"          //	Script is run when document goes in offline	NEW
+	EvtOffline          = "offline"          //	Script is run when document comes in Event = "line	NEW
+	EvtPagehide         = "pagehide"         //	Script is run when document window is hidden	NEW
+	EvtPageshow         = "pageshow"         //	Script is run when document window become visible	NEW
+	EvtPopstate         = "popstate"         //	Script is run when document window history changes	NEW
+	EvtRedo             = "redo"             //	Script is run when document perform redo	NEW
+	EvtResize           = "resize"           //	Event fires when browser window is resized	NEW
+	EvtStorage          = "storage"          //	Script is run when web storage area is updated	NEW
+	EvtUndo             = "undo"             //	Script is run when document performs undo	NEW
+	EvtUnload           = "unload"           //	Event fires when browser window has been closed
 
 	// Form Events
 	// Form Events triggered by perform some action inside HTML form elements.
@@ -108,12 +115,6 @@ const (
 	EvtWaiting          = "waiting"          //	Script is run when media has paused(for buffer more data)	NEW
 	// onerror            //	Script is run when error occurs file loaded time	NEW
 
-)
-
-var (
-	document = js.Global.Get("document")
-	Doc      = &Element{Object: document}
-	Body     = &Element{Object: document.Get("body")}
 )
 
 type Element struct {
@@ -277,7 +278,7 @@ func (ev *Event) ModifierState(mod string) bool {
 	return ev.Call("getModifierState", mod).Bool()
 }
 
-func (e *Element) AddEventListener(typ string, useCapture bool, listener func(*Event)) func(*js.Object) {
+func (e *Element) AddEventListener(typ string, listener func(*Event), useCapture bool) func(*js.Object) {
 	wrapper := func(o *js.Object) {
 		ev := &Event{Object: o}
 		listener(ev)
@@ -286,6 +287,21 @@ func (e *Element) AddEventListener(typ string, useCapture bool, listener func(*E
 	return wrapper
 }
 
-func (e *Element) RemoveEventListener(typ string, useCapture bool, listener func(*js.Object)) {
+func (e *Element) RemoveEventListener(typ string, listener func(*js.Object), useCapture bool) {
 	e.Call("removeEventListener", typ, listener, useCapture)
+}
+
+func OnLoad(callback func()) {
+	Doc.AddEventListener(EvtLoad, func(*Event) {
+		callback()
+	}, false)
+}
+
+// The event "DOMContentLoaded" will be fired when the document has been parsed completely,
+// that is without stylesheets* and additional images.
+// If you need to wait for images and stylesheets, use "load" instead.
+func OnDOMContentLoaded(callback func()) {
+	Doc.AddEventListener(EvtDOMContentLoaded, func(*Event) {
+		callback()
+	}, false)
 }
