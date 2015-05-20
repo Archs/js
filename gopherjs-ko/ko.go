@@ -39,6 +39,38 @@ func (ob *Observable) Extend(params js.M) *Observable {
 	return ob
 }
 
+// The rateLimit extender, however, causes an observable to suppress and delay change notifications for a specified period of time. A rate-limited observable therefore updates dependencies asynchronously.
+//
+// The rateLimit extender can be applied to any type of observable, including observable arrays and computed observables. The main use cases for rate-limiting are:
+//
+// 		1. Making things respond after a certain delay
+// 		2. Combining multiple changes into a single update
+//
+// fixedRate default is true
+func (ob *Observable) RateLimit(timeout int, fixedRate ...bool) {
+	method := "notifyAtFixedRate"
+	if len(fixedRate) >= 1 && !fixedRate[0] {
+		method = "notifyWhenChangesStop"
+	}
+	ob.Extend(js.M{
+		"rateLimit": js.M{
+			"timeout": timeout,
+			"method":  method,
+		},
+	})
+}
+
+// When a computed observable returns a primitive value (a number, string, boolean, or null),
+// the dependencies of the observable are normally only notified if the value actually changed.
+// However, it is possible to use the built-in notify extender to ensure
+// that a computed observable’s subscribers are always notified on an update,
+// even if the value is the same.
+func (ob *Observable) NotifyAlways() {
+	ob.Extend(js.M{
+		"notify": "always",
+	})
+}
+
 func (ob *ObservableArray) IndexOf(data interface{}) int {
 	return ob.o.Call("indexOf", data).Int()
 }
