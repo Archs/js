@@ -7,6 +7,46 @@ package canvas
 import (
 	"github.com/Archs/js/dom"
 	"github.com/gopherjs/gopherjs/js"
+	"image"
+)
+
+const (
+	// 	source-over (default)
+	// 这是默认设置，新图形会覆盖在原有内容之上。
+	CompositeSourceOver = "source-over"
+	// destination-over
+	// 会在原有内容之下绘制新图形。
+	CompositeDestinationOver = "destination-over"
+	// source-in
+	// 新图形会仅仅出现与原有内容重叠的部分。其它区域都变成透明的。
+	CompositeCompositeSourceIn = "source-in"
+	// destination-in
+	// 原有内容中与新图形重叠的部分会被保留，其它区域都变成透明的。
+	CompositeDestinationIn = "destination-in"
+	// source-out
+	// 结果是只有新图形中与原有内容不重叠的部分会被绘制出来。
+	CompositeSourceOut = "source-out"
+	// destination-out
+	// 原有内容中与新图形不重叠的部分会被保留。
+	CompositeDestinationOut = "destination-out"
+	// source-atop
+	// 新图形中与原有内容重叠的部分会被绘制，并覆盖于原有内容之上。
+	CompositeSourceAtop = "source-atop"
+	// destination-atop
+	// 原有内容中与新内容重叠的部分会被保留，并会在原有内容之下绘制新图形
+	CompositeDestinationAtop = "destination-atop"
+	// lighter
+	// 两图形中重叠部分作加色处理。
+	CompositeLighter = "lighter"
+	// darker
+	// 两图形中重叠的部分作减色处理。
+	CompositeDarker = "darker"
+	// xor
+	// 重叠的部分会变成透明。
+	CompositeXor = "xor"
+	// copy
+	// 只有新图形会被保留，其它都被清除掉。
+	CompositeCopy = "copy"
 )
 
 // canvas元素也可以通过应用CSS的方式来增加边框，设置内边距、外边距等，
@@ -25,11 +65,19 @@ type Context2D struct {
 	// 线条的颜色，默认为”#000000”，其值可以设置为CSS颜色值、渐变对象或者模式对象。
 	StrokeStyle interface{} `js:"strokeStyle"`
 	// 填充的颜色，默认为”#000000”，与strokeStyle一样，值也可以设置为CSS颜色值、渐变对象或者模式对象。
-	FillStyle     interface{} `js:"fillStyle"`
-	ShadowColor   string      `js:"shadowColor"`
-	ShadowBlur    int         `js:"shadowBlur"`
-	ShadowOffsetX int         `js:"shadowOffsetX"`
-	ShadowOffsetY int         `js:"shadowOffsetY"`
+	FillStyle interface{} `js:"fillStyle"`
+	// specifies the color of the shadow.
+	// A DOMString parsed as CSS <color> value. The default value is fully-transparent black.
+	ShadowColor string `js:"shadowColor"`
+	// specifies the level of the blurring effect;
+	// this value doesn't correspond to a number of pixels and is not affected by the current transformation matrix.
+	// The default value is 0.
+	ShadowBlur int `js:"shadowBlur"`
+	// The CanvasRenderingContext2D.shadowOffsetY property of the Canvas 2D API specifies the distance that the shadow will be offset in vertical distance.
+	// A float specifying the distance that the shadow will be offset in vertical distance. The default value is 0. Negative, Infinity or NaN values are ignored.
+	ShadowOffsetX int `js:"shadowOffsetX"`
+	// The CanvasRenderingContext2D.shadowOffsetX property of the Canvas 2D API specifies the distance that the shadow will be offset in horizontal distance.
+	ShadowOffsetY int `js:"shadowOffsetY"`
 
 	// 线条的端点样式，有butt（无）、round（圆头）、square（方头）三种类型可供选择，默认为butt。
 	LineCap string `js:"lineCap"`
@@ -40,14 +88,20 @@ type Context2D struct {
 	// 线条尖角折角的锐利程序，默认为10。
 	MiterLimit int `js:"miterLimit"`
 
-	// Text
-	Font         string `js:"font"`
-	TextAlign    string `js:"textAlign"`
+	// A string parsed as CSS font value. The default font is 10px sans-serif.
+	Font string `js:"font"`
+	// ctx.textAlign = "left" || "right" || "center" || "start" || "end";
+	TextAlign string `js:"textAlign"`
+	// ctx.textBaseline = "top" || "hanging" || "middle" || "alphabetic" || "ideographic" || "bottom";
 	TextBaseline string `js:"textBaseline"`
 
 	// Compositing
-	GlobalAlpha              float64 `js:"globalAlpha"`
-	GlobalCompositeOperation string  `js:"globalCompositeOperation"`
+	// specifies the alpha value that is applied to shapes and images before they are drawn onto the canvas.
+	// The value is in the range from 0.0 (fully transparent) to 1.0 (fully opaque).
+	GlobalAlpha float64 `js:"globalAlpha"`
+	// the type of compositing operation to apply when drawing new shapes,
+	// where type is a string identifying which of the compositing or blending mode operations to use.
+	GlobalCompositeOperation string `js:"globalCompositeOperation"`
 }
 
 // New creates a Canvas instance
@@ -74,11 +128,131 @@ func (c *Canvas) ToDataUrl(mimeType ...string) string {
 
 // Colors, Styles, and Shadows
 
-func (ctx *Context2D) CreateLinearGradient(x0, y0, x1, y1 int) {
-	ctx.Call("createLinearGradient", x0, y0, x1, y1)
+type Gradient struct {
+	o *js.Object
 }
 
-// Rectangles
+// The CanvasGradient.addColorStop() method adds a new stop,
+// defined by an offset and a color, to the gradient.
+// If the offset is not between 0 and 1, an INDEX_SIZE_ERR is raised, if the color can't be parsed as a CSS <color>, a SYNTAX_ERR is raised.
+//
+// offset
+// 	A number between 0 and 1. An INDEX_SIZE_ERR is raised, if the number is not in that range.
+// color
+// 	A CSS <color>. A SYNTAX_ERR is raised, if the value can not be parsed as a CSS <color> value.
+func (g *Gradient) AddColorStop(offset float64, color string) {
+	g.o.Call("addColorStop", offset, color)
+}
+
+// Value returns the Object used in ctx.FillStyle/StrokeStyle
+func (g *Gradient) Value() *js.Object {
+	return g.o
+}
+
+// The CanvasRenderingContext2D.createLinearGradient() method of the Canvas 2D API creates a gradient along the line given by the coordinates represented by the parameters. This method returns a linear CanvasGradient.
+func (ctx *Context2D) CreateLinearGradient(x0, y0, x1, y1 int) *Gradient {
+	o := ctx.Call("createLinearGradient", x0, y0, x1, y1)
+	return &Gradient{o: o}
+}
+
+// The CanvasRenderingContext2D.createRadialGradient() method of the Canvas 2D API creates a radial gradient given by the coordinates of the two circles represented by the parameters. This method returns a CanvasGradient.
+//
+// Syntax
+// CanvasGradient ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);
+//
+// x0
+//	 The x axis of the coordinate of the start circle.
+// y0
+//	 The y axis of the coordinate of the start circle.
+// r0
+//	 The radius of the start circle.
+// x1
+//	 The x axis of the coordinate of the end circle.
+// y1
+//	 The y axis of the coordinate of the end circle.
+// r1
+//	 The radius of the end circle.
+//
+// example:
+//		var canvas = document.getElementById("canvas");
+//		var ctx = canvas.getContext("2d");
+//
+//		var gradient = ctx.createRadialGradient(100,100,100,100,100,0);
+//		gradient.addColorStop(0,"white");
+//		gradient.addColorStop(1,"green");
+//		ctx.fillStyle = gradient;
+//		ctx.fillRect(0,0,200,200);
+func (ctx *Context2D) CreateRadialGradient(x0, y0, r0, x1, y1, r1 int) *Gradient {
+	o := ctx.Call("createRadialGradient", x0, y0, r0, x1, y1, r1)
+	return &Gradient{o: o}
+}
+
+// The CanvasPattern interface represents an opaque object describing a pattern, based on a image, a canvas or a video, created by the CanvasRenderingContext2D.createPattern() method.
+type Pattern struct {
+	o *js.Object
+}
+
+// Value returns the Object used in ctx.FillStyle/StrokeStyle
+func (p *Pattern) Value() *js.Object {
+	return p.o
+}
+
+// The CanvasRenderingContext2D.createPattern() method of the Canvas 2D API creates a pattern using the specified image (a CanvasImageSource).
+// It repeats the source in the directions specified by the repetition argument. This method returns a CanvasPattern.
+//
+// Syntax
+// CanvasPattern ctx.createPattern(image, repetition);
+//
+// image
+// 		A CanvasImageSource to be used as image to repeat. It can either be a:
+// 		HTMLImageElement (<img>),
+// 		HTMLVideoElement (<video>),
+// 		HTMLCanvasElement (<canvas>),
+// 		CanvasRenderingContext2D,
+// 		ImageBitmap,
+// 		ImageData, or a
+// 		Blob.
+// repetition
+// 		A DOMString indicating how to repeat the image. Possible values are:
+// 		"repeat" (both directions),
+// 		"repeat-x" (horizontal only),
+// 		"repeat-y" (vertical only), or
+// 		"no-repeat" (neither).
+// 		If repetition is an empty string ('') or null (but not undefined), repetition will be "repeat".
+// example
+// 		var canvas = document.getElementById("canvas");
+// 		var ctx = canvas.getContext("2d");
+//
+// 		var img = new Image();
+// 		img.src = 'https://mdn.mozillademos.org/files/222/Canvas_createpattern.png';
+// 		img.onload = function() {
+// 		  var pattern = ctx.createPattern(img, 'repeat');
+// 		  ctx.fillStyle = pattern;
+// 		  ctx.fillRect(0,0,400,400);
+// 		};
+func (ctx *Context2D) CreatePattern(image interface{}, repetition string) *Pattern {
+	o := ctx.Call("createPattern", image, repetition)
+	return &Pattern{o: o}
+}
+
+// void ctx.setLineDash(segments);
+// Parameters
+//
+// segments
+// An Array. A list of numbers that specifies distances to alternately draw a line and a gap (in coordinate space units).
+// If the number of elements in the array is odd, the elements of the array get copied and concatenated. For example, [5, 15, 25] will become [5, 15, 25, 5, 15, 25].
+func (ctx *Context2D) SetLineDash(distances ...int) {
+	ctx.Call("setLineDash", distances)
+}
+
+// ctx.getLineDash();
+// Return value
+//
+// An Array. A list of numbers that specifies distances to alternately draw a line and a gap (in coordinate space units). If the number, when setting the elements, was odd, the elements of the array get copied and concatenated. For example, setting the line dash to [5, 15, 25] will result in getting back [5, 15, 25, 5, 15, 25].
+func (ctx *Context2D) GetLineDash() []int {
+	o := ctx.Call("getLineDash")
+	return o.Interface().([]int)
+}
 
 // 用于描绘一个已知左上角顶点位置以及宽和高的矩形，描绘完成后Context的绘制起点会移动到该矩形的左上角顶点。
 //
@@ -186,24 +360,66 @@ func (ctx *Context2D) IsPointInPath(x, y int) bool {
 	return ctx.Call("isPointInPath", x, y).Bool()
 }
 
-// 缩放
-func (ctx *Context2D) Scale(scaleWidth, scaleHeight int) {
+// The CanvasRenderingContext2D.isPointInStroke() method of the Canvas 2D API reports whether or not the specified point is inside the area contained by the stroking of a path.
+func (ctx *Context2D) IsPointInStroke(x, y int) bool {
+	return ctx.Call("isPointInStroke", x, y).Bool()
+}
+
+// The CanvasRenderingContext2D.scale() method of the Canvas 2D API adds a scaling transformation to the canvas units by x horizontally and by y vertically.
+//
+// By default, one unit on the canvas is exactly one pixel. If we apply, for instance, a scaling factor of 0.5, the resulting unit would become 0.5 pixels and so shapes would be drawn at half size. In a similar way setting the scaling factor to 2.0 would increase the unit size and one unit now becomes two pixels. This results in shapes being drawn twice as large.
+func (ctx *Context2D) Scale(scaleWidth, scaleHeight interface{}) {
 	ctx.Call("scale", scaleWidth, scaleHeight)
 }
 
-func (ctx *Context2D) Rotate(angle int) {
+// The CanvasRenderingContext2D.rotate() method of the Canvas 2D API adds a rotation to the transformation matrix.
+// The angle argument represents a clockwise rotation angle and is expressed in radians.
+// You can use degree * Math.PI / 180 if you want to calculate from a degree value.
+func (ctx *Context2D) Rotate(angle interface{}) {
 	ctx.Call("rotate", angle)
 }
 
-func (ctx *Context2D) Translate(x, y int) {
+// The CanvasRenderingContext2D.translate() method of the Canvas 2D API
+// adds a translation transformation by moving the canvas and its origin x horizontally and y vertically on the grid.
+func (ctx *Context2D) Translate(x, y interface{}) {
 	ctx.Call("translate", x, y)
 }
 
-func (ctx *Context2D) Transform(a, b, c, d, e, f int) {
+// The CanvasRenderingContext2D.transform() method of the Canvas 2D API
+// multiplies the current transformation with the matrix described by the arguments of this method.
+// You are able to scale, rotate, move and skew the context.
+//    a (m11)
+//    	Horizontal scaling.
+//    b (m12)
+//    	Horizontal skewing.
+//    c (m21)
+//    	Vertical skewing.
+//    d (m22)
+//    	Vertical scaling.
+//    e (dx)
+//    	Horizontal moving.
+//    f (dy)
+//    	Vertical moving.
+func (ctx *Context2D) Transform(a, b, c, d, e, f interface{}) {
 	ctx.Call("transform", a, b, c, d, e, f)
 }
 
-func (ctx *Context2D) SetTransform(a, b, c, d, e, f int) {
+// The CanvasRenderingContext2D.setTransform() method of the Canvas 2D API
+// resets (overrides) the current transformation to the identity matrix
+// and then invokes a transformation described by the arguments of this method.
+//    a (m11)
+//    	Horizontal scaling.
+//    b (m12)
+//    	Horizontal skewing.
+//    c (m21)
+//    	Vertical skewing.
+//    d (m22)
+//    	Vertical scaling.
+//    e (dx)
+//    	Horizontal moving.
+//    f (dy)
+//    	Vertical moving.
+func (ctx *Context2D) SetTransform(a, b, c, d, e, f interface{}) {
 	ctx.Call("setTransform", a, b, c, d, e, f)
 }
 
@@ -245,4 +461,16 @@ func (ctx *Context2D) Restore() {
 // image参数可以是HTMLImageElement、HTMLCanvasElement或者HTMLVideoElement。
 func (ctx *Context2D) DrawImage(image *dom.Element, dx, dy, dw, dh int) {
 	ctx.Call("drawImage")
+}
+
+func (c *Context2D) GetImage(x, y, width, heigth int) image.Image {
+	im := c.Call("getImageData", x, y, width, heigth)
+	width = im.Get("width").Int()
+	heigth = im.Get("heigth").Int()
+	data := im.Get("data").Interface().([]byte)
+	rgba := new(image.RGBA)
+	rgba.Pix = data
+	rgba.Stride = width * 4
+	rgba.Rect = image.Rect(0, 0, width, heigth)
+	return rgba
 }
