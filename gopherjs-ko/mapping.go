@@ -5,8 +5,8 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-// MappedViewModel using in the Mapped result
-type MappedViewModel struct {
+// ViewModel can be used to wrap ko vm object
+type ViewModel struct {
 	*js.Object
 }
 
@@ -19,7 +19,7 @@ type Mapper struct {
 
 func Mapping() *Mapper {
 	return &Mapper{
-		Object: Global().Get("mapping"),
+		Object: ko().Get("mapping"),
 	}
 }
 
@@ -37,8 +37,8 @@ func (m *Mapper) args() []interface{} {
 	return args
 }
 
-func (m *Mapper) FromJS(data interface{}) (vm *MappedViewModel) {
-	vm = new(MappedViewModel)
+func (m *Mapper) FromJS(data interface{}) (vm *ViewModel) {
+	vm = new(ViewModel)
 	m.data = data
 	vm.Object = m.Object.Call("fromJS", m.args()...)
 	return
@@ -50,12 +50,12 @@ func (m *Mapper) Target(obj *js.Object) *Mapper {
 	return m
 }
 
-func (m *Mapper) ToJS(vm *MappedViewModel) *js.Object {
+func (m *Mapper) ToJS(vm *ViewModel) *js.Object {
 	return m.Object.Call("toJS", vm.Object)
 }
 
-func (m *Mapper) FromJSON(data string) (vm *MappedViewModel) {
-	vm = new(MappedViewModel)
+func (m *Mapper) FromJSON(data string) (vm *ViewModel) {
+	vm = new(ViewModel)
 	m.data = data
 	vm.Object = m.Object.Call("fromJSON", m.args()...)
 	return
@@ -93,7 +93,7 @@ func (m *Mapper) Observe(properties ...string) *Mapper {
 // 	return false
 // }
 
-func (v *MappedViewModel) Set(keyPath string, value interface{}) {
+func (v *ViewModel) Set(keyPath string, value interface{}) {
 	obj := property.Get(v.Object, keyPath)
 	if obj == js.Undefined {
 		// if isArray(value) {
@@ -101,13 +101,13 @@ func (v *MappedViewModel) Set(keyPath string, value interface{}) {
 		// } else {
 		// 	v.Set(key, NewObservable(value))
 		// }
-		panic("MappedViewModel has no key: " + keyPath)
+		panic("ViewModel has no key: " + keyPath)
 	} else {
 		obj.Invoke(value)
 	}
 }
 
-func (v *MappedViewModel) Get(keyPath string) *js.Object {
+func (v *ViewModel) Get(keyPath string) *js.Object {
 	obj := property.Get(v.Object, keyPath)
 	if obj == js.Undefined {
 		return obj
@@ -115,7 +115,7 @@ func (v *MappedViewModel) Get(keyPath string) *js.Object {
 	return obj.Invoke()
 }
 
-func (v *MappedViewModel) Update(data interface{}) *MappedViewModel {
+func (v *ViewModel) Update(data interface{}) *ViewModel {
 	Mapping().Call("fromJS", data, v.Object)
 	return v
 }
