@@ -147,6 +147,7 @@ func Body() *Element {
 	return Wrap(Document().Get("body"))
 }
 
+// Create an element instance
 func CreateElement(tagName string) *Element {
 	obj := Document().Call("createElement", tagName)
 	return Wrap(obj)
@@ -283,17 +284,25 @@ func (ev *Event) ModifierState(mod string) bool {
 	return ev.Call("getModifierState", mod).Bool()
 }
 
-func (e *Element) AddEventListener(typ string, listener func(*Event), useCapture bool) func(*js.Object) {
+func (e *Element) AddEventListener(typ string, listener func(*Event), useCapture ...bool) func(*js.Object) {
+	capture := false
+	if len(useCapture) >= 1 {
+		capture = useCapture[0]
+	}
 	wrapper := func(o *js.Object) {
 		ev := &Event{Object: o}
 		listener(ev)
 	}
-	e.Call("addEventListener", typ, wrapper, useCapture)
+	e.Call("addEventListener", typ, wrapper, capture)
 	return wrapper
 }
 
-func (e *Element) RemoveEventListener(typ string, listener func(*js.Object), useCapture bool) {
-	e.Call("removeEventListener", typ, listener, useCapture)
+func (e *Element) RemoveEventListener(typ string, listener func(*js.Object), useCapture ...bool) {
+	capture := false
+	if len(useCapture) >= 1 {
+		capture = useCapture[0]
+	}
+	e.Call("removeEventListener", typ, listener, capture)
 }
 
 func OnLoad(callback func()) {
