@@ -50,15 +50,16 @@ func (ob *Observable) Extend(params js.M) *Observable {
 // 		1. Making things respond after a certain delay
 // 		2. Combining multiple changes into a single update
 //
-// fixedRate default is true
-func (ob *Observable) RateLimit(timeout int, fixedRate ...bool) {
+// when "notifyWhenChangesStop" is true change envent will be fired only after no change event detects anymore.
+// "notifyWhenChangesStop" default is false, then it works under "notifyAtFixedRate" mode, at most one change in one timeframe.
+func (ob *Observable) RateLimit(timeframe int, notifyWhenChangesStop ...bool) {
 	method := "notifyAtFixedRate"
-	if len(fixedRate) >= 1 && !fixedRate[0] {
+	if len(notifyWhenChangesStop) >= 1 && notifyWhenChangesStop[0] {
 		method = "notifyWhenChangesStop"
 	}
 	ob.Extend(js.M{
 		"rateLimit": js.M{
-			"timeout": timeout,
+			"timeout": timeframe,
 			"method":  method,
 		},
 	})
