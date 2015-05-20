@@ -5,10 +5,10 @@ package ko
 
 import "github.com/gopherjs/gopherjs/js"
 
-type Disposable func()
+type Disposer func()
 
 type Observable struct {
-	*js.Object
+	o *js.Object
 }
 
 type ObservableArray struct {
@@ -20,59 +20,59 @@ type Computed struct {
 }
 
 func (ob *Observable) Set(data interface{}) {
-	ob.Object.Invoke(data)
+	ob.o.Invoke(data)
 }
 
 func (ob *Observable) Get() *js.Object {
-	return ob.Invoke()
+	return ob.o.Invoke()
 }
 
-func (ob *Observable) Subscribe(fn func(*js.Object)) Disposable {
-	o := ob.Call("subscribe", fn)
+func (ob *Observable) Subscribe(fn func(*js.Object)) Disposer {
+	o := ob.o.Call("subscribe", fn)
 	return func() {
 		o.Invoke()
 	}
 }
 
 func (ob *Observable) Extend(params js.M) *Observable {
-	ob.Call("extend", params)
+	ob.o.Call("extend", params)
 	return ob
 }
 
 func (ob *ObservableArray) IndexOf(data interface{}) int {
-	return ob.Call("indexOf", data).Int()
+	return ob.o.Call("indexOf", data).Int()
 }
 
 func (ob *ObservableArray) Pop() *js.Object {
-	return ob.Call("pop")
+	return ob.o.Call("pop")
 }
 
 func (ob *ObservableArray) Unshift(data interface{}) {
-	ob.Call("unshift", data)
+	ob.o.Call("unshift", data)
 }
 
 func (ob *ObservableArray) Shift() *js.Object {
-	return ob.Call("shift")
+	return ob.o.Call("shift")
 }
 
 func (ob *ObservableArray) Reverse() {
-	ob.Call("reverse")
+	ob.o.Call("reverse")
 }
 
 func (ob *ObservableArray) Sort() {
-	ob.Call("sort")
+	ob.o.Call("sort")
 }
 
 func (ob *ObservableArray) SortFunc(fn func(*js.Object, *js.Object)) {
-	ob.Call("sort", fn)
+	ob.o.Call("sort", fn)
 }
 
 func (ob *ObservableArray) Splice(i, n int) *js.Object {
-	return ob.Call("splice", i, n)
+	return ob.o.Call("splice", i, n)
 }
 
 func (ob *ObservableArray) RemoveAll(items ...interface{}) *js.Object {
-	return ob.Call("removeAll", items...)
+	return ob.o.Call("removeAll", items...)
 }
 
 func (ob *ObservableArray) Index(i int) *js.Object {
@@ -84,47 +84,47 @@ func (ob *ObservableArray) Length() int {
 }
 
 func (ob *ObservableArray) Push(data interface{}) {
-	ob.Call("push", data)
+	ob.o.Call("push", data)
 }
 
 func (ob *ObservableArray) Remove(item interface{}) *js.Object {
-	return ob.Call("remove", item)
+	return ob.o.Call("remove", item)
 }
 
 func (ob *ObservableArray) RemoveFunc(fn func(*js.Object) bool) *js.Object {
-	return ob.Call("remove", fn)
+	return ob.o.Call("remove", fn)
 }
 
 type ComponentsFuncs struct {
-	*js.Object
+	o *js.Object
 }
 
 func Components() *ComponentsFuncs {
 	return &ComponentsFuncs{
-		Object: Global().Get("components"),
+		o: ko().Get("components"),
 	}
 }
 
 func (co *ComponentsFuncs) Register(name string, params js.M) {
-	co.Call("register", name, params)
+	co.o.Call("register", name, params)
 }
 
-func Global() *js.Object {
+func ko() *js.Object {
 	return js.Global.Get("ko")
 }
 
 func NewObservable(data interface{}) *Observable {
 	return &Observable{
-		Object: Global().Call("observable", data),
+		o: ko().Call("observable", data),
 	}
 }
 
 func NewObservableArray(data interface{}) *ObservableArray {
-	return &ObservableArray{&Observable{Global().Call("observableArray", data)}}
+	return &ObservableArray{&Observable{ko().Call("observableArray", data)}}
 }
 
 func NewComputed(fn func() interface{}) *Computed {
-	return &Computed{&Observable{Global().Call("computed", fn)}}
+	return &Computed{&Observable{ko().Call("computed", fn)}}
 }
 
 // RegisterURLTemplateLoader register a new template loader which can be used to load
@@ -144,7 +144,7 @@ func RegisterURLTemplateLoader() {
 				// We need an array of DOM nodes, not a string.
 				// We can use the default loader to convert to the
 				// required format.
-				Components().Get("defaultLoader").Call("loadTemplate", name, data, callback)
+				Components().o.Get("defaultLoader").Call("loadTemplate", name, data, callback)
 			})
 		} else {
 			// Unrecognized config format. Let another loader handle it.
@@ -152,15 +152,15 @@ func RegisterURLTemplateLoader() {
 		}
 	}
 
-	Components().Get("loaders").Call("unshift", js.M{
+	Components().o.Get("loaders").Call("unshift", js.M{
 		"loadTemplate": loader,
 	})
 }
 
 func Unwrap(ob *js.Object) *js.Object {
-	return Global().Call("unwrap", ob)
+	return ko().Call("unwrap", ob)
 }
 
 func ApplyBindings(model interface{}) {
-	Global().Call("applyBindings", model)
+	ko().Call("applyBindings", model)
 }

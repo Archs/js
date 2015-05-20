@@ -7,11 +7,11 @@ type ValidatedObservable struct {
 }
 
 func NewValidatedObservable(data interface{}) *ValidatedObservable {
-	return &ValidatedObservable{&Observable{Global().Call("validatedObservable", data)}}
+	return &ValidatedObservable{&Observable{ko().Call("validatedObservable", data)}}
 }
 
-func (ob *ValidatedObservable) IsValid() bool {
-	return ob.Call("isValid").Bool()
+func (v *ValidatedObservable) IsValid() bool {
+	return v.o.Call("isValid").Bool()
 }
 
 type ValidationFuncs struct {
@@ -19,7 +19,7 @@ type ValidationFuncs struct {
 }
 
 func Validation() *ValidationFuncs {
-	return &ValidationFuncs{Object: Global().Get("validation")}
+	return &ValidationFuncs{Object: ko().Get("validation")}
 }
 
 func (v *ValidationFuncs) Init(config js.M) {
