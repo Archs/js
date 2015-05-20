@@ -19,6 +19,10 @@ type Computed struct {
 	*Observable
 }
 
+type WritableComputed struct {
+	*Computed
+}
+
 func (ob *Observable) Set(data interface{}) {
 	ob.o.Invoke(data)
 }
@@ -71,18 +75,22 @@ func (ob *Observable) NotifyAlways() {
 	})
 }
 
+// adds a new item to the end of array
 func (ob *ObservableArray) IndexOf(data interface{}) int {
 	return ob.o.Call("indexOf", data).Int()
 }
 
+// removes the last value from the array and returns it
 func (ob *ObservableArray) Pop() *js.Object {
 	return ob.o.Call("pop")
 }
 
+// inserts a new item at the beginning of the array
 func (ob *ObservableArray) Unshift(data interface{}) {
 	ob.o.Call("unshift", data)
 }
 
+// removes the first value from the array and returns it
 func (ob *ObservableArray) Shift() *js.Object {
 	return ob.o.Call("shift")
 }
@@ -99,6 +107,11 @@ func (ob *ObservableArray) SortFunc(fn func(*js.Object, *js.Object)) {
 	ob.o.Call("sort", fn)
 }
 
+// removes and returns a given number of elements starting from a given index.
+// For example,
+// 		myObservableArray.splice(1, 3)
+// removes three elements starting from index position 1
+// (i.e., the 2nd, 3rd, and 4th elements) and returns them as an array.
 func (ob *ObservableArray) Splice(i, n int) *js.Object {
 	return ob.o.Call("splice", i, n)
 }
@@ -157,6 +170,42 @@ func NewObservableArray(data interface{}) *ObservableArray {
 
 func NewComputed(fn func() interface{}) *Computed {
 	return &Computed{&Observable{ko().Call("computed", fn)}}
+}
+
+func NewWritableComputed(r func() interface{}, w func(interface{})) *WritableComputed {
+	return &WritableComputed{
+		&Computed{
+			&Observable{
+				ko().Call("computed", js.M{
+					"read":  r,
+					"write": w,
+				}),
+			},
+		},
+	}
+}
+
+func (ob *Computed) Dispose() {
+	ob.o.Call("dispose")
+}
+
+// Returns the current value of the computed observable without creating a dependency
+func (ob *Computed) Peek() *js.Object {
+	return ob.o.Call("peek")
+}
+
+// returns true for observables, observable arrays, and all computed observables.
+func IsObservable(data interface{}) bool {
+	return ko().Call("isObservable", data).Bool()
+}
+
+func IsComputed(data interface{}) bool {
+	return ko().Call("isComputed", data).Bool()
+}
+
+// returns true for observables, observable arrays, and writable computed observables
+func IsWritableObservable(data interface{}) bool {
+	return ko().Call("isWritableObservable", data).Bool()
 }
 
 // RegisterURLTemplateLoader register a new template loader which can be used to load
