@@ -242,6 +242,22 @@ func Unwrap(ob *js.Object) *js.Object {
 	return ko().Call("unwrap", ob)
 }
 
-func ApplyBindings(model interface{}) {
-	ko().Call("applyBindings", model)
+// In case you’re wondering what the parameters to ko.applyBindings do,
+//
+// the first parameter says what view model object you want to use with the declarative bindings it activates
+//
+// Optionally, you can pass a second parameter to define which part of the document you want to search for data-bind attributes.
+//
+// For example,
+// 	ko.applyBindings(myViewModel, document.getElementById('someElementId')).
+// This restricts the activation to the element with ID someElementId and its descendants, which is useful if you want to have multiple view models and associate each with a different region of the page.
+func ApplyBindings(args ...interface{}) {
+	if len(args) < 1 {
+		panic("ko.ApplyBindings takes at least ONE parameter")
+	}
+	if len(args) >= 2 {
+		ko().Call("applyBindings", args[0], args[1])
+		return
+	}
+	ko().Call("applyBindings", args[0])
 }
