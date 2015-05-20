@@ -165,8 +165,11 @@ func NewObservable(data interface{}) *Observable {
 	}
 }
 
-func NewObservableArray(data interface{}) *ObservableArray {
-	return &ObservableArray{&Observable{ko().Call("observableArray", data)}}
+func NewObservableArray(data ...interface{}) *ObservableArray {
+	if len(data) > 1 {
+		return &ObservableArray{&Observable{ko().Call("observableArray", data)}}
+	}
+	return &ObservableArray{&Observable{ko().Call("observableArray")}}
 }
 
 func NewComputed(fn func() interface{}) *Computed {
