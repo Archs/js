@@ -61,8 +61,8 @@ func (m *Mapper) FromJSON(data string) (vm *MappedViewModel) {
 	return
 }
 
-func (m *Mapper) ToJSON(vm *MappedViewModel) string {
-	return m.Object.Call("toJSON", vm.Object).String()
+func (m *Mapper) ToJSON(vm interface{}) string {
+	return m.Object.Call("toJSON", vm).String()
 }
 
 // Set mapping options
