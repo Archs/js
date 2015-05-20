@@ -2,15 +2,15 @@ package ko
 
 import "github.com/gopherjs/gopherjs/js"
 
-type ValidatedObservable interface {
-	IsValid() bool
+type ValidatedObservable struct {
+	Observable
 }
 
 func NewValidatedObservable(data interface{}) ValidatedObservable {
-	return &Object{Global().Call("validatedObservable", data)}
+	return ValidatedObservable{Observable{Global().Call("validatedObservable", data)}}
 }
 
-func (ob *Object) IsValid() bool {
+func (ob *ValidatedObservable) IsValid() bool {
 	return ob.Call("isValid").Bool()
 }
 

@@ -5,112 +5,99 @@ package ko
 
 import "github.com/gopherjs/gopherjs/js"
 
-type Disposable interface {
-	Dispose()
-}
+// type Disposable interface {
+// 	Dispose()
+// }
+type Disposable func()
 
-type Observable interface {
-	Disposable
-
-	Set(interface{})
-	Get() *js.Object
-	Subscribe(func(*js.Object)) Disposable
-	Extend(js.M) Observable
-}
-
-type ObservableArray interface {
-	Observable
-
-	Index(int) *js.Object
-	Length() int
-	Push(interface{})
-	Remove(interface{}) *js.Object
-	RemoveFunc(func(*js.Object) bool) *js.Object
-}
-
-type Computed interface {
-	Observable
-}
-
-type Object struct {
+type Observable struct {
 	*js.Object
 }
 
-func (ob *Object) Dispose() {
+type ObservableArray struct {
+	Observable
+}
+
+type Computed struct {
+	Observable
+}
+
+func (ob Observable) Dispose() {
 	ob.Call("dispose")
 }
 
-func (ob *Object) Set(data interface{}) {
-	ob.Invoke(data)
+func (ob Observable) Set(data interface{}) {
+	ob.Object.Invoke(data)
 }
 
-func (ob *Object) Get() *js.Object {
+func (ob Observable) Get() *js.Object {
 	return ob.Invoke()
 }
 
-func (ob *Object) Subscribe(fn func(*js.Object)) Disposable {
-	return &Object{ob.Call("subscribe", fn)}
+func (ob Observable) Subscribe(fn func(*js.Object)) Disposable {
+	o := Observable{ob.Call("subscribe", fn)}
+	return o.Dispose
 }
 
-func (ob *Object) Extend(params js.M) Observable {
+func (ob Observable) Extend(params js.M) Observable {
 	ob.Call("extend", params)
 	return ob
 }
 
-func (ob *Object) Index(i int) *js.Object {
-	return ob.Get().Index(i)
-}
-
-func (ob *Object) Length() int {
-	return ob.Get().Length()
-}
-
-func (ob *Object) IndexOf(data interface{}) int {
+func (ob Observable) IndexOf(data interface{}) int {
 	return ob.Call("indexOf", data).Int()
 }
 
-func (ob *Object) Push(data interface{}) {
-	ob.Call("push", data)
-}
-
-func (ob *Object) Pop() *js.Object {
+func (ob Observable) Pop() *js.Object {
 	return ob.Call("pop")
 }
 
-func (ob *Object) Unshift(data interface{}) {
+func (ob Observable) Unshift(data interface{}) {
 	ob.Call("unshift", data)
 }
 
-func (ob *Object) Shift() *js.Object {
+func (ob Observable) Shift() *js.Object {
 	return ob.Call("shift")
 }
 
-func (ob *Object) Reverse() {
+func (ob Observable) Reverse() {
 	ob.Call("reverse")
 }
 
-func (ob *Object) Sort() {
+func (ob Observable) Sort() {
 	ob.Call("sort")
 }
 
-func (ob *Object) SortFunc(fn func(*js.Object, *js.Object)) {
+func (ob Observable) SortFunc(fn func(*js.Object, *js.Object)) {
 	ob.Call("sort", fn)
 }
 
-func (ob *Object) Splice(i, n int) *js.Object {
+func (ob Observable) Splice(i, n int) *js.Object {
 	return ob.Call("splice", i, n)
 }
 
-func (ob *Object) Remove(item interface{}) *js.Object {
+func (ob Observable) RemoveAll(items ...interface{}) *js.Object {
+	return ob.Call("removeAll", items...)
+}
+
+func (ob ObservableArray) Index(i int) *js.Object {
+	return ob.Get().Index(i)
+}
+
+func (ob ObservableArray) Length() int {
+	return ob.Get().Length()
+}
+
+func (ob ObservableArray) Push(data interface{}) {
+	ob.Call("push", data)
+}
+
+func (ob ObservableArray) Remove(item interface{}) *js.Object {
 	return ob.Call("remove", item)
 }
 
-func (ob *Object) RemoveFunc(fn func(*js.Object) bool) *js.Object {
+func (ob ObservableArray) RemoveFunc(fn func(*js.Object) bool) *js.Object {
 	return ob.Call("remove", fn)
-}
-
-func (ob *Object) RemoveAll(items ...interface{}) *js.Object {
-	return ob.Call("removeAll", items...)
 }
 
 type ComponentsFuncs struct {
@@ -132,15 +119,17 @@ func Global() *js.Object {
 }
 
 func NewObservable(data interface{}) Observable {
-	return &Object{Global().Call("observable", data)}
+	return Observable{
+		Object: Global().Call("observable", data),
+	}
 }
 
 func NewObservableArray(data interface{}) ObservableArray {
-	return &Object{Global().Call("observableArray", data)}
+	return ObservableArray{Observable{Global().Call("observableArray", data)}}
 }
 
 func NewComputed(fn func() interface{}) Computed {
-	return &Object{Global().Call("computed", fn)}
+	return Computed{Observable{Global().Call("computed", fn)}}
 }
 
 // RegisterURLTemplateLoader register a new template loader which can be used to load
