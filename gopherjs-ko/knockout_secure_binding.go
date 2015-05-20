@@ -11,7 +11,7 @@ import (
 //    noVirtualElements: false       // default true
 // };
 // ko.bindingProvider.instance = new ko.secureBindingsProvider(options);
-
+//
 // Knockout Secure Binding (KSB) is a binding provider for Knockout
 // that can be used with a Content Security Policy (CSP)
 // that disables eval and new Function.
