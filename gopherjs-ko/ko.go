@@ -52,14 +52,14 @@ func (ob *Observable) Extend(params js.M) *Observable {
 //
 // when "notifyWhenChangesStop" is true change envent will be fired only after no change event detects anymore.
 // "notifyWhenChangesStop" default is false, then it works under "notifyAtFixedRate" mode, at most one change in one timeframe.
-func (ob *Observable) RateLimit(timeframe int, notifyWhenChangesStop ...bool) {
+func (ob *Observable) RateLimit(timeframeMS int, notifyWhenChangesStop ...bool) {
 	method := "notifyAtFixedRate"
 	if len(notifyWhenChangesStop) >= 1 && notifyWhenChangesStop[0] {
 		method = "notifyWhenChangesStop"
 	}
 	ob.Extend(js.M{
 		"rateLimit": js.M{
-			"timeout": timeframe,
+			"timeout": timeframeMS,
 			"method":  method,
 		},
 	})
@@ -166,8 +166,8 @@ func NewObservable(data interface{}) *Observable {
 }
 
 func NewObservableArray(data ...interface{}) *ObservableArray {
-	if len(data) > 1 {
-		return &ObservableArray{&Observable{ko().Call("observableArray", data)}}
+	if len(data) >= 1 {
+		return &ObservableArray{&Observable{ko().Call("observableArray", data[0])}}
 	}
 	return &ObservableArray{&Observable{ko().Call("observableArray")}}
 }
