@@ -92,8 +92,9 @@ func (m *Mapper) Observe(properties ...string) *Mapper {
 // 	return false
 // }
 
+// TODO using a path to set ViewModel values
 func (v *ViewModel) Set(key string, value interface{}) {
-	if v.Get(key) == nil {
+	if v.Object.Get(key) == js.Undefined {
 		// if isArray(value) {
 		// 	v.Set(key, NewObservableArray(value))
 		// } else {
