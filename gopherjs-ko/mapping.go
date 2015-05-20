@@ -101,7 +101,7 @@ func (v *MappedViewModel) Set(keyPath string, value interface{}) {
 		// } else {
 		// 	v.Set(key, NewObservable(value))
 		// }
-		panic("vm has no key: " + keyPath)
+		panic("MappedViewModel has no key: " + keyPath)
 	} else {
 		obj.Invoke(value)
 	}
