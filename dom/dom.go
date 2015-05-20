@@ -5,12 +5,6 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-var (
-	document = js.Global.Get("document")
-	Doc      = &Element{Object: document}
-	Body     = &Element{Object: document.Get("body")}
-)
-
 const (
 	// Wheel Delta
 	DeltaPixel = 0
@@ -135,18 +129,30 @@ type Element struct {
 	LastElementChild       *Element `js:"lastElementChild"`
 }
 
+func Wrap(el *js.Object) *Element {
+	return &Element{Object: el}
+}
+
+func Window() *Element {
+	return Wrap(js.Global)
+}
+
+func Document() *Element {
+	return Wrap(js.Global.Get("document"))
+}
+
+func Body() *Element {
+	return Wrap(Document().Get("body"))
+}
+
 func CreateElement(tagName string) *Element {
-	obj := document.Call("createElement", tagName)
-	return &Element{Object: obj}
+	obj := Document().Call("createElement", tagName)
+	return Wrap(obj)
 }
 
 func GetElementById(id string) *Element {
-	obj := document.Call("getElementById", id)
-	return &Element{Object: obj}
-}
-
-func HtmlElement(el *js.Object) *Element {
-	return &Element{Object: el}
+	obj := Document().Call("getElementById", id)
+	return Wrap(obj)
 }
 
 func Alert(msg string) {
@@ -179,14 +185,14 @@ func (e *Element) RemoveAttribute(attr string) {
 
 func (e *Element) QuerySelector(sel string) *Element {
 	obj := e.Call("querySelector", sel)
-	return &Element{Object: obj}
+	return Wrap(obj)
 }
 
 func (e *Element) QuerySelectorAll(sel string) []*Element {
 	var out []*Element
 	objs := e.Call("querySelectorAll", sel)
 	for i := 0; i < objs.Length(); i++ {
-		out = append(out, &Element{Object: objs.Index(i)})
+		out = append(out, Wrap(objs.Index(i)))
 	}
 	return out
 }
@@ -195,6 +201,7 @@ func (e *Element) QuerySelectorAll(sel string) []*Element {
 // concrete event types.
 type Event struct {
 	*js.Object
+	Type string `js:"type"`
 	// close event
 	Code     int    `js:"code"`
 	Reason   string `js:"reason"`
@@ -238,7 +245,7 @@ func (ev *Event) Cancelable() bool {
 }
 
 func (ev *Event) CurrentTarget() *Element {
-	return &Element{Object: ev.Get("currentTarget")}
+	return Wrap(ev.Get("currentTarget"))
 }
 
 func (ev *Event) DefaultPrevented() bool {
@@ -250,16 +257,12 @@ func (ev *Event) EventPhase() int {
 }
 
 func (ev *Event) Target() *Element {
-	return &Element{Object: ev.Get("target")}
+	return Wrap(ev.Get("target"))
 }
 
 // timestamp in ms
 func (ev *Event) Timestamp() int {
 	return ev.Get("timeStamp").Int()
-}
-
-func (ev *Event) Type() string {
-	return ev.Get("type").String()
 }
 
 func (ev *Event) PreventDefault() {
@@ -292,7 +295,7 @@ func (e *Element) RemoveEventListener(typ string, listener func(*js.Object), use
 }
 
 func OnLoad(callback func()) {
-	Doc.AddEventListener(EvtLoad, func(*Event) {
+	Window().AddEventListener(EvtLoad, func(*Event) {
 		callback()
 	}, false)
 }
@@ -301,7 +304,7 @@ func OnLoad(callback func()) {
 // that is without stylesheets* and additional images.
 // If you need to wait for images and stylesheets, use "load" instead.
 func OnDOMContentLoaded(callback func()) {
-	Doc.AddEventListener(EvtDOMContentLoaded, func(*Event) {
+	Window().AddEventListener(EvtDOMContentLoaded, func(*Event) {
 		callback()
 	}, false)
 }
