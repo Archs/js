@@ -159,10 +159,11 @@ func ko() *js.Object {
 	return js.Global.Get("ko")
 }
 
-func NewObservable(data interface{}) *Observable {
-	return &Observable{
-		o: ko().Call("observable", data),
+func NewObservable(data ...interface{}) *Observable {
+	if len(data) >= 1 {
+		return &Observable{ko().Call("observable", data[0])}
 	}
+	return &Observable{ko().Call("observable")}
 }
 
 func NewObservableArray(data ...interface{}) *ObservableArray {

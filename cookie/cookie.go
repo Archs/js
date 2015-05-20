@@ -7,9 +7,9 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-var (
-	doc = js.Global.Get("document")
-)
+func doc() *js.Object {
+	return js.Global.Get("document")
+}
 
 func uriDecode(str string) string {
 	return js.Global.Call("decodeURIComponent", str).String()
@@ -22,7 +22,7 @@ func uriEncode(str string) string {
 // Get returns a given cookie by name. If the cookie is not set, ok will be
 // set to false
 func Get(name string) (value string, ok bool) {
-	cookieStr := doc.Get("cookie").String()
+	cookieStr := doc().Get("cookie").String()
 	if cookieStr == "" {
 		return "", false
 	}
@@ -41,7 +41,7 @@ func Get(name string) (value string, ok bool) {
 // SetString sets a cookie given a correctly formatted cookie string
 // i.e "username=John Smith; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/"
 func SetString(cookie string) {
-	doc.Set("cookie", cookie)
+	doc().Set("cookie", cookie)
 }
 
 // Set adds a cookie to a user's browser with a name, value, expiry and path
