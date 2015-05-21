@@ -177,7 +177,7 @@ type Element struct {
 }
 
 func Wrap(el *js.Object) *Element {
-	if el == js.Undefined && el == nil {
+	if el == js.Undefined || el == nil {
 		return nil
 	}
 	return &Element{Object: el}
