@@ -2,9 +2,13 @@
 <html>
 <head>
     <title>KO Testing</title>
+    <link rel="stylesheet" type="text/css" href="resources/semantic.min.css">
 </head>
 <body>
     <h2>Hello</h2>
+    <ko-vcard params="{FirstName:'John', LastName:'Wang', AvatarUrl:'img/Canvas_createpattern.png'}"></ko-vcard>
+    <ko-vcard params="{FirstName:'John', AvatarUrl:'img/Canvas_createpattern.png'}"></ko-vcard>
+    <ko-vcard></ko-vcard>
     <clock params="width:500, height:500"></clock>
     <clock params="width:300, height:300"></clock>
     <clock params="width:200, height:200"></clock>
@@ -15,6 +19,7 @@
     <clock params="width:30, height:30"></clock>
     <clock params="width:10, height:10"></clock>
     <span data-bind="component: {name:'clock',params:{width:200,height:150}}"></span>
+    <span data-bind="component: {name:'clock',params:{width:60,height:150}}"></span>
 </body>
     <script type="text/javascript" src="resources/knockout-3.3.0.min.js"></script>
     <script type="text/javascript" src="resources/knockout-secure-binding.min.js"></script>
