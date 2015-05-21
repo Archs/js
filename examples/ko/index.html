@@ -2,14 +2,14 @@
 <html>
 <head>
     <title>KO Testing</title>
-    <link rel="stylesheet" type="text/css" href="resources/semantic.min.css">
 </head>
 <body>
     <h2>Hello</h2>
-    <ko-vcard params="{FirstName:'John', LastName:'Wang', AvatarUrl:'img/Canvas_createpattern.png'}"></ko-vcard>
+    <ko-vcard params="{FirstName:'John', LastName:'Wang', AvatarUrl:'img/Canvas_createpattern.png', About:'Sazzy is the blog of British Designer, Sarah Parmenter. Owner of You Know Who, Blushbar and Lovely.在他的带领之下，苹果公司重生了，成为消费者电子产品市场的领头羊，成为全球最有价值的上市公司。'}"></ko-vcard>
     <ko-vcard params="{FirstName:'John', AvatarUrl:'img/Canvas_createpattern.png'}"></ko-vcard>
+    <ko-vcard params="{FirstName:'John', AvatarUrl:'img/x.png'}"></ko-vcard>
     <ko-vcard></ko-vcard>
-    <clock params="width:500, height:500"></clock>
+<!--     <clock params="width:500, height:500"></clock>
     <clock params="width:300, height:300"></clock>
     <clock params="width:200, height:200"></clock>
     <clock params="width:150, height:150"></clock>
@@ -18,7 +18,7 @@
     <clock params="width:50, height:50"></clock>
     <clock params="width:30, height:30"></clock>
     <clock params="width:10, height:10"></clock>
-    <span data-bind="component: {name:'clock',params:{width:200,height:150}}"></span>
+ -->    <span data-bind="component: {name:'clock',params:{width:200,height:150}}"></span>
     <span data-bind="component: {name:'clock',params:{width:60,height:150}}"></span>
 </body>
     <script type="text/javascript" src="resources/knockout-3.3.0.min.js"></script>
