@@ -49,21 +49,24 @@ func newSimClock(ctx *canvas.Context2D, w, h int) *simClock {
 
 func (s *simClock) drawPane() {
 	s.Save()
+	defer s.Restore()
 	// outer
 	s.StrokeStyle = "black"
 	s.LineWidth = s.r * s.borderRatio
+	// center point
 	s.BeginPath()
-	s.Arc(0, 0, s.r-10, 0, 2*math.Pi, false)
+	s.Arc(0, 0, s.r*s.borderRatio, 0, 2*math.Pi, false)
+	s.Fill()
+	// circle
+	s.BeginPath()
+	s.Arc(0, 0, s.r*(1-s.borderRatio), 0, 2*math.Pi, false)
 	s.Stroke()
 	// hour marks
 	s.LineWidth = s.r * s.markRatio
 	iv := math.Pi / 6
-	s.Save()
 	for i := 1; i <= 12; i++ {
-		s.BeginPath()
 		r1 := s.r * (1 - 2*s.markRatio - s.borderRatio)
 		r2 := s.r * (1 - s.borderRatio)
-		// r3 := float64(s.r - 40)
 		r3 := s.r * (1 - 4*s.markRatio - s.borderRatio)
 		angle := iv*float64(i) - math.Pi/2
 		x1 := r1 * math.Cos(angle)
@@ -72,10 +75,10 @@ func (s *simClock) drawPane() {
 		y2 := r2 * math.Sin(angle)
 		x3 := r3 * math.Cos(angle)
 		y3 := r3 * math.Sin(angle)
+		s.BeginPath()
 		s.MoveTo(x1, y1)
 		s.LineTo(x2, y2)
 		s.Stroke()
-		s.Save()
 		// s.Rotate(-1 * math.Pi / 2)
 		s.Font = "bold 20px Arial"
 		s.TextAlign = "center"
@@ -84,9 +87,7 @@ func (s *simClock) drawPane() {
 		if s.r > 90 {
 			s.FillText(fmt.Sprintf("%d", i), x3, y3, 20)
 		}
-		s.Restore()
 	}
-	s.Restore()
 	// minutes marks
 	iv = math.Pi / 30
 	s.LineWidth = s.r * s.markRatio * 0.5
@@ -97,12 +98,11 @@ func (s *simClock) drawPane() {
 		s.LineTo(s.r*(1-s.borderRatio), 0)
 		s.Stroke()
 	}
-	// end
-	s.Restore()
 }
 
 func (s *simClock) drawCZ() {
 	s.Save()
+	defer s.Restore()
 	// begin
 	s.SetLineDash(1, 1)
 	// x
@@ -115,17 +115,16 @@ func (s *simClock) drawCZ() {
 	s.MoveTo(0, s.r)
 	s.LineTo(0, -1*s.r)
 	s.Stroke()
-	// end
-	s.Restore()
 }
 
 func (s *simClock) drawNeedle(t time.Time) {
 	s.Save()
+	defer s.Restore()
 	needle := func(angle float64, lineWidth float64, ratio float64, color string) {
 		s.BeginPath()
 		s.StrokeStyle = color
 		s.LineWidth = lineWidth
-		r := float64(s.r) * ratio
+		r := s.r * ratio
 		angle = angle - math.Pi/2
 		x := r * math.Cos(angle)
 		y := r * math.Sin(angle)
@@ -142,13 +141,11 @@ func (s *simClock) drawNeedle(t time.Time) {
 	// second
 	angleSecond := (float64(t.Second()) + float64(t.Nanosecond())/1000000000.0) / 30.0 * math.Pi
 	needle(angleSecond, 1.0, s.secondNeedleRatio, "red")
-	// end
-	s.Restore()
 }
 
 func (s *simClock) drawDay(t time.Time) {
 	day := t.Day()
-	r := float64(s.r) * 0.45
+	r := s.r * 0.45
 	if r > 30 {
 		s.FillStyle = "black"
 		s.FillRect(r, -11, 25, 20)
@@ -160,6 +157,7 @@ func (s *simClock) drawDay(t time.Time) {
 
 func (s *simClock) draw(t time.Time) {
 	s.Save()
+	defer s.Restore()
 	s.ClearRect(0, 0, s.w, s.h)
 	s.Translate(s.w/2, s.h/2)
 	s.StrokeStyle = "black"
@@ -168,15 +166,6 @@ func (s *simClock) draw(t time.Time) {
 	s.drawPane()
 	s.drawNeedle(t)
 	s.drawDay(t)
-	s.Restore()
-
-	if s.r > 90 {
-		s.Save()
-		s.Translate(s.w/2, s.h/2)
-		s.Font = "20px serif"
-		s.FillText(t.Format("15:04:05"), -s.r*0.25, s.r*0.5, 100)
-		s.Restore()
-	}
 }
 
 func registerClock() {
