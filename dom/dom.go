@@ -171,10 +171,15 @@ type Element struct {
 	// img, script
 	Src string `js:"src"`
 	// style
-	Style *CSSStyleDeclaration `js:"style"`
+	Style     *CSSStyleDeclaration `js:"style"`
+	ClassName string               `js:"className"`
+	ClassList []string             `js:"classList"`
 }
 
 func Wrap(el *js.Object) *Element {
+	if el == js.Undefined && el == nil {
+		return nil
+	}
 	return &Element{Object: el}
 }
 
