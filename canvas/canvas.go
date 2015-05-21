@@ -166,7 +166,7 @@ func (g *Gradient) Value() *js.Object {
 }
 
 // The CanvasRenderingContext2D.createLinearGradient() method of the Canvas 2D API creates a gradient along the line given by the coordinates represented by the parameters. This method returns a linear CanvasGradient.
-func (ctx *Context2D) CreateLinearGradient(x0, y0, x1, y1 int) *Gradient {
+func (ctx *Context2D) CreateLinearGradient(x0, y0, x1, y1 float64) *Gradient {
 	o := ctx.Call("createLinearGradient", x0, y0, x1, y1)
 	return &Gradient{o: o}
 }
@@ -198,7 +198,7 @@ func (ctx *Context2D) CreateLinearGradient(x0, y0, x1, y1 int) *Gradient {
 //			gradient.addColorStop(1,"green");
 //			ctx.fillStyle = gradient;
 //	 		ctx.fillRect(0,0,200,200);
-func (ctx *Context2D) CreateRadialGradient(x0, y0, r0, x1, y1, r1 int) *Gradient {
+func (ctx *Context2D) CreateRadialGradient(x0, y0, r0, x1, y1, r1 float64) *Gradient {
 	o := ctx.Call("createRadialGradient", x0, y0, r0, x1, y1, r1)
 	return &Gradient{o: o}
 }
@@ -257,7 +257,7 @@ func (ctx *Context2D) CreatePattern(image *dom.Element, repetition string) *Patt
 // segments
 // An Array. A list of numbers that specifies distances to alternately draw a line and a gap (in coordinate space units).
 // If the number of elements in the array is odd, the elements of the array get copied and concatenated. For example, [5, 15, 25] will become [5, 15, 25, 5, 15, 25].
-func (ctx *Context2D) SetLineDash(distances ...int) {
+func (ctx *Context2D) SetLineDash(distances ...float64) {
 	ctx.Call("setLineDash", distances)
 }
 
@@ -265,32 +265,32 @@ func (ctx *Context2D) SetLineDash(distances ...int) {
 // Return value
 //
 // An Array. A list of numbers that specifies distances to alternately draw a line and a gap (in coordinate space units). If the number, when setting the elements, was odd, the elements of the array get copied and concatenated. For example, setting the line dash to [5, 15, 25] will result in getting back [5, 15, 25, 5, 15, 25].
-func (ctx *Context2D) GetLineDash() []int {
+func (ctx *Context2D) GetLineDash() []float64 {
 	o := ctx.Call("getLineDash")
-	return o.Interface().([]int)
+	return o.Interface().([]float64)
 }
 
 // 用于描绘一个已知左上角顶点位置以及宽和高的矩形，描绘完成后Context的绘制起点会移动到该矩形的左上角顶点。
 //
 // 参数表示矩形左上角顶点的x、y坐标以及矩形的宽和高。
-func (ctx *Context2D) Rect(x, y, width, height interface{}) {
+func (ctx *Context2D) Rect(x, y, width, height float64) {
 	ctx.Call("rect", x, y, width, height)
 }
 
 // 用于使用当前的fillStyle（默认为”#000000”，黑色）样式
 // 填充一个左上角顶点在(left, top)点、宽为width、高为height的矩形。
-func (ctx *Context2D) FillRect(left, top, width, height interface{}) {
+func (ctx *Context2D) FillRect(left, top, width, height float64) {
 	ctx.Call("fillRect", left, top, width, height)
 }
 
 // 用于使用当前的线条风格绘制一个左上角顶点在(left, top)点、宽为width、高为height的矩形边框。
-func (ctx *Context2D) StrokeRect(left, top, width, height interface{}) {
+func (ctx *Context2D) StrokeRect(left, top, width, height float64) {
 	ctx.Call("strokeRect", left, top, width, height)
 }
 
 // clearRect的作用是清除矩形区域内的所有内容并将它恢复到初始状态，即透明色
 // 用于清除左上角顶点在(left,top)点、宽为width、高为height的矩形区域内的所有内容。
-func (ctx *Context2D) ClearRect(left, top, width, height interface{}) {
+func (ctx *Context2D) ClearRect(left, top, width, height float64) {
 	ctx.Call("clearRect", left, top, width, height)
 }
 
@@ -317,7 +317,7 @@ func (ctx *Context2D) BeginPath() {
 
 // 用于显式地指定路径的起点。默认状态下，第一条路径的起点是画布的(0, 0)点，之后的起点是上一条路径的终点。
 // 两个参数分为表示起点的x、y坐标值。
-func (ctx *Context2D) MoveTo(x, y interface{}) {
+func (ctx *Context2D) MoveTo(x, y float64) {
 	ctx.Call("moveTo", x, y)
 }
 
@@ -331,7 +331,7 @@ func (ctx *Context2D) ClosePath() {
 // 用于描绘一条从起点从指定位置的直线路径，描绘完成后绘制的起点会移动到该指定位置。
 //
 // 参数表示指定位置的x、y坐标值。
-func (ctx *Context2D) LineTo(x, y interface{}) {
+func (ctx *Context2D) LineTo(x, y float64) {
 	ctx.Call("lineTo", x, y)
 }
 
@@ -351,53 +351,53 @@ func (ctx *Context2D) Clip() {
 // 第一组代表控制点（control point）。
 // 所谓的控制点位于曲线的旁边（不是曲线之上），其作用相当于对曲线产生一个拉力。
 // 通过调整控制点的位置，就可以改变曲线的曲率。
-func (ctx *Context2D) QuadraticCurveTo(cpx, cpy, x, y interface{}) {
+func (ctx *Context2D) QuadraticCurveTo(cpx, cpy, x, y float64) {
 	ctx.Call("quadraticCurveTo", cpx, cpy, x, y)
 }
 
 // 用于描绘以当前Context绘制起点为起点，(cpx1,cpy1)点和(cpx2, cpy2)点为两个控制点，
 // (x, y)点为终点的贝塞尔曲线路径。
-func (ctx *Context2D) BezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y interface{}) {
+func (ctx *Context2D) BezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y float64) {
 	ctx.Call("bezierCurveTo", cp1x, cp1y, cp2x, cp2y, x, y)
 }
 
 // 参数中的两个弧度以0表示0°，位置在3点钟方向；Math.PI值表示180°，位置在9点钟方向。
-func (ctx *Context2D) Arc(x, y, radius, sAngle, eAngle interface{}, counterclockwise bool) {
+func (ctx *Context2D) Arc(x, y, radius, sAngle, eAngle float64, counterclockwise bool) {
 	ctx.Call("arc", x, y, radius, sAngle, eAngle, counterclockwise)
 }
 
 // 用于描绘一个与两条线段相切的圆弧，两条线段分别以当前Context绘制起点和(x2, y2)点为起点，都以(x1, y1)点为终点，圆弧的半径为radius。
 // 描绘完成后绘制起点会移动到以(x2, y2)为起点的线段与圆弧的切点。
-func (ctx *Context2D) ArcTo(x1, y1, x2, y2, r interface{}) {
+func (ctx *Context2D) ArcTo(x1, y1, x2, y2, r float64) {
 	ctx.Call("arcTo", x1, y1, x2, y2, r)
 }
 
-func (ctx *Context2D) IsPointInPath(x, y interface{}) bool {
+func (ctx *Context2D) IsPointInPath(x, y float64) bool {
 	return ctx.Call("isPointInPath", x, y).Bool()
 }
 
 // The CanvasRenderingContext2D.isPointInStroke() method of the Canvas 2D API reports whether or not the specified point is inside the area contained by the stroking of a path.
-func (ctx *Context2D) IsPointInStroke(x, y interface{}) bool {
+func (ctx *Context2D) IsPointInStroke(x, y float64) bool {
 	return ctx.Call("isPointInStroke", x, y).Bool()
 }
 
 // The CanvasRenderingContext2D.scale() method of the Canvas 2D API adds a scaling transformation to the canvas units by x horizontally and by y vertically.
 //
 // By default, one unit on the canvas is exactly one pixel. If we apply, for instance, a scaling factor of 0.5, the resulting unit would become 0.5 pixels and so shapes would be drawn at half size. In a similar way setting the scaling factor to 2.0 would increase the unit size and one unit now becomes two pixels. This results in shapes being drawn twice as large.
-func (ctx *Context2D) Scale(scaleWidth, scaleHeight interface{}) {
+func (ctx *Context2D) Scale(scaleWidth, scaleHeight float64) {
 	ctx.Call("scale", scaleWidth, scaleHeight)
 }
 
 // The CanvasRenderingContext2D.rotate() method of the Canvas 2D API adds a rotation to the transformation matrix.
 // The angle argument represents a clockwise rotation angle and is expressed in radians.
 // You can use degree * Math.PI / 180 if you want to calculate from a degree value.
-func (ctx *Context2D) Rotate(angle interface{}) {
+func (ctx *Context2D) Rotate(angle float64) {
 	ctx.Call("rotate", angle)
 }
 
 // The CanvasRenderingContext2D.translate() method of the Canvas 2D API
 // adds a translation transformation by moving the canvas and its origin x horizontally and y vertically on the grid.
-func (ctx *Context2D) Translate(x, y interface{}) {
+func (ctx *Context2D) Translate(x, y float64) {
 	ctx.Call("translate", x, y)
 }
 
@@ -416,7 +416,7 @@ func (ctx *Context2D) Translate(x, y interface{}) {
 //    	Horizontal moving.
 //    f (dy)
 //    	Vertical moving.
-func (ctx *Context2D) Transform(a, b, c, d, e, f interface{}) {
+func (ctx *Context2D) Transform(a, b, c, d, e, f float64) {
 	ctx.Call("transform", a, b, c, d, e, f)
 }
 
@@ -435,14 +435,14 @@ func (ctx *Context2D) Transform(a, b, c, d, e, f interface{}) {
 //    	Horizontal moving.
 //    f (dy)
 //    	Vertical moving.
-func (ctx *Context2D) SetTransform(a, b, c, d, e, f interface{}) {
+func (ctx *Context2D) SetTransform(a, b, c, d, e, f float64) {
 	ctx.Call("setTransform", a, b, c, d, e, f)
 }
 
 // fillText()方法能够在画布中绘制字符串
 //
 // 需绘制的字符串，绘制到画布中时左上角在画布中的横坐标及纵坐标，绘制的字符串的最大长度。其中最大长度maxWidth是可选参数。另外，可以通过改变Context对象的font属性来调整字符串的字体以及大小，默认为”10px sans-serif”。
-func (ctx *Context2D) FillText(text string, x, y, maxWidth interface{}) {
+func (ctx *Context2D) FillText(text string, x, y, maxWidth float64) {
 	if maxWidth == -1 {
 		ctx.Call("fillText", text, x, y)
 		return
@@ -451,7 +451,7 @@ func (ctx *Context2D) FillText(text string, x, y, maxWidth interface{}) {
 	ctx.Call("fillText", text, x, y, maxWidth)
 }
 
-func (ctx *Context2D) StrokeText(text string, x, y, maxWidth interface{}) {
+func (ctx *Context2D) StrokeText(text string, x, y, maxWidth float64) {
 	if maxWidth == -1 {
 		ctx.Call("strokeText", text, x, y)
 		return
@@ -475,7 +475,7 @@ func (ctx *Context2D) Restore() {
 // Context对象中拥有drawImage()方法可以将外部图片绘制到Canvas中。
 //
 // image参数可以是HTMLImageElement、HTMLCanvasElement或者HTMLVideoElement。
-func (ctx *Context2D) DrawImage(image *dom.Element, dx, dy, dw, dh int) {
+func (ctx *Context2D) DrawImage(image *dom.Element, dx, dy, dw, dh float64) {
 	ctx.Call("drawImage", image, dx, dy, dw, dh)
 }
 
