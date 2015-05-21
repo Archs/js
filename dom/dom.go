@@ -197,12 +197,16 @@ func CreateElement(tagName string) *Element {
 }
 
 func GetElementById(id string) *Element {
-	obj := Document().Call("getElementById", id)
-	return Wrap(obj)
+	return Document().GetElementById(id)
 }
 
 func Alert(msg string) {
 	js.Global.Call("alert", msg)
+}
+
+func (e *Element) GetElementById(id string) *Element {
+	obj := e.Call("getElementById", id)
+	return Wrap(obj)
 }
 
 func (e *Element) AppendChild(child *Element) {
