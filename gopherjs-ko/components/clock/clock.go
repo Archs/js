@@ -6,6 +6,7 @@
 package clock
 
 import (
+	"fmt"
 	"github.com/Archs/js/canvas"
 	"github.com/Archs/js/dom"
 	"github.com/Archs/js/gopherjs-ko"
@@ -25,30 +26,48 @@ func (s *simClock) drawPane() {
 	s.Save()
 	// outer
 	s.StrokeStyle = "black"
-	s.LineWidth = 2
+	s.LineWidth = 10
 	s.BeginPath()
-	s.Arc(0, 0, s.r-2, 0, 2*math.Pi, false)
+	s.Arc(0, 0, s.r-10, 0, 2*math.Pi, false)
 	s.Stroke()
-	// hour needle
+	// hour marks
 	s.LineWidth = 6
 	iv := math.Pi / 6
 	s.Save()
-	for i := 0; i < 12; i++ {
-		s.Rotate(iv)
+	for i := 1; i <= 12; i++ {
+		// s.Rotate(iv)
 		s.BeginPath()
-		s.MoveTo(s.r-7, 0)
-		s.LineTo(s.r-1, 0)
+		r1 := float64(s.r - 25)
+		r2 := float64(s.r - 10)
+		r3 := float64(s.r - 40)
+		angle := iv*float64(i) - math.Pi/2
+		x1 := r1 * math.Cos(angle)
+		y1 := r1 * math.Sin(angle)
+		x2 := r2 * math.Cos(angle)
+		y2 := r2 * math.Sin(angle)
+		x3 := r3 * math.Cos(angle)
+		y3 := r3 * math.Sin(angle)
+		s.MoveTo(x1, y1)
+		s.LineTo(x2, y2)
 		s.Stroke()
+		s.Save()
+		// s.Rotate(-1 * math.Pi / 2)
+		s.Font = "bold 20px Arial"
+		s.TextAlign = "center"
+		s.TextBaseline = "middle"
+		// s.FillStyle = "#FFF"
+		s.FillText(fmt.Sprintf("%d", i), x3, y3, 20)
+		s.Restore()
 	}
 	s.Restore()
-	// minutes needle
+	// minutes marks
 	iv = math.Pi / 30
 	s.LineWidth = 3
 	for i := 0; i < 60; i++ {
 		s.Rotate(iv)
 		s.BeginPath()
-		s.MoveTo(s.r-5, 0)
-		s.LineTo(s.r-1, 0)
+		s.MoveTo(s.r-20, 0)
+		s.LineTo(s.r-10, 0)
 		s.Stroke()
 	}
 	// end
@@ -75,25 +94,38 @@ func (s *simClock) drawCZ() {
 
 func (s *simClock) drawNeedle(t time.Time) {
 	s.Save()
-	s.Rotate(-1 * math.Pi / 2)
+	needle := func(angle float64, lineWidth int, ratio float64, color string) {
+		s.BeginPath()
+		s.StrokeStyle = color
+		s.LineWidth = lineWidth
+		r := float64(s.r) * ratio
+		angle = angle - math.Pi/2
+		x := r * math.Cos(angle)
+		y := r * math.Sin(angle)
+		s.MoveTo(0, 0)
+		s.LineTo(x, y)
+		s.Stroke()
+	}
 	// houre
-	s.Save()
-	angleHour := float32(t.Hour()) / 12.0 * math.Pi
-	s.LineWidth = 5
-	s.Rotate(angleHour)
-	s.MoveTo(-15, 0)
-	s.LineTo(s.r-30, 0)
-	s.Stroke()
-	s.Restore()
+	angleHour := float64(t.Hour()) / 6.0 * math.Pi
+	needle(angleHour, 5, 0.5, "black")
 	// minute
-	angleMinute := float32(t.Minute()) / 30.0 * math.Pi
-	s.LineWidth = 2
-	s.Rotate(angleMinute)
-	s.MoveTo(-25, 0)
-	s.LineTo(s.r-20, 0)
-	s.Stroke()
+	angleMinute := float64(t.Minute()) / 30.0 * math.Pi
+	needle(angleMinute, 3, 0.7, "black")
+	// second
+	angleSecond := (float64(t.Second()) + float64(t.Nanosecond())/1000000000.0) / 30.0 * math.Pi
+	needle(angleSecond, 1, 0.8, "red")
 	// end
 	s.Restore()
+}
+
+func (s *simClock) drawDay(t time.Time) {
+	day := t.Day()
+	r := float64(s.r) * 0.6
+	s.FillStyle = "black"
+	s.FillRect(r, -2, 5, 4)
+	s.FillStyle = "white"
+	s.FillText(fmt.Sprintf("%d", day), r, -2, 10)
 }
 
 func (s *simClock) draw(t time.Time) {
@@ -110,7 +142,11 @@ func (s *simClock) draw(t time.Time) {
 	// s.drawCZ()
 	s.drawPane()
 	s.drawNeedle(t)
+	s.drawDay(t)
+	s.Restore()
 
+	s.Save()
+	s.Translate(s.w/2, s.h/2)
 	s.Font = "20px serif"
 	s.FillText(t.Format("15:04:05"), -35, 50, 100)
 	s.Restore()
@@ -148,7 +184,7 @@ func registerClock() {
 				}
 				clock.draw(time.Now())
 				go func() {
-					for t := range time.Tick(time.Second) {
+					for t := range time.Tick(time.Millisecond * 100) {
 						clock.draw(t)
 					}
 				}()
