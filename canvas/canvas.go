@@ -273,24 +273,24 @@ func (ctx *Context2D) GetLineDash() []int {
 // 用于描绘一个已知左上角顶点位置以及宽和高的矩形，描绘完成后Context的绘制起点会移动到该矩形的左上角顶点。
 //
 // 参数表示矩形左上角顶点的x、y坐标以及矩形的宽和高。
-func (ctx *Context2D) Rect(x, y, width, height int) {
+func (ctx *Context2D) Rect(x, y, width, height interface{}) {
 	ctx.Call("rect", x, y, width, height)
 }
 
 // 用于使用当前的fillStyle（默认为”#000000”，黑色）样式
 // 填充一个左上角顶点在(left, top)点、宽为width、高为height的矩形。
-func (ctx *Context2D) FillRect(left, top, width, height int) {
+func (ctx *Context2D) FillRect(left, top, width, height interface{}) {
 	ctx.Call("fillRect", left, top, width, height)
 }
 
 // 用于使用当前的线条风格绘制一个左上角顶点在(left, top)点、宽为width、高为height的矩形边框。
-func (ctx *Context2D) StrokeRect(left, top, width, height int) {
+func (ctx *Context2D) StrokeRect(left, top, width, height interface{}) {
 	ctx.Call("strokeRect", left, top, width, height)
 }
 
 // clearRect的作用是清除矩形区域内的所有内容并将它恢复到初始状态，即透明色
 // 用于清除左上角顶点在(left,top)点、宽为width、高为height的矩形区域内的所有内容。
-func (ctx *Context2D) ClearRect(left, top, width, height int) {
+func (ctx *Context2D) ClearRect(left, top, width, height interface{}) {
 	ctx.Call("clearRect", left, top, width, height)
 }
 
@@ -317,7 +317,7 @@ func (ctx *Context2D) BeginPath() {
 
 // 用于显式地指定路径的起点。默认状态下，第一条路径的起点是画布的(0, 0)点，之后的起点是上一条路径的终点。
 // 两个参数分为表示起点的x、y坐标值。
-func (ctx *Context2D) MoveTo(x, y int) {
+func (ctx *Context2D) MoveTo(x, y interface{}) {
 	ctx.Call("moveTo", x, y)
 }
 
@@ -331,7 +331,7 @@ func (ctx *Context2D) ClosePath() {
 // 用于描绘一条从起点从指定位置的直线路径，描绘完成后绘制的起点会移动到该指定位置。
 //
 // 参数表示指定位置的x、y坐标值。
-func (ctx *Context2D) LineTo(x, y int) {
+func (ctx *Context2D) LineTo(x, y interface{}) {
 	ctx.Call("lineTo", x, y)
 }
 
@@ -442,7 +442,7 @@ func (ctx *Context2D) SetTransform(a, b, c, d, e, f interface{}) {
 // fillText()方法能够在画布中绘制字符串
 //
 // 需绘制的字符串，绘制到画布中时左上角在画布中的横坐标及纵坐标，绘制的字符串的最大长度。其中最大长度maxWidth是可选参数。另外，可以通过改变Context对象的font属性来调整字符串的字体以及大小，默认为”10px sans-serif”。
-func (ctx *Context2D) FillText(text string, x, y, maxWidth int) {
+func (ctx *Context2D) FillText(text string, x, y, maxWidth interface{}) {
 	if maxWidth == -1 {
 		ctx.Call("fillText", text, x, y)
 		return
@@ -451,7 +451,7 @@ func (ctx *Context2D) FillText(text string, x, y, maxWidth int) {
 	ctx.Call("fillText", text, x, y, maxWidth)
 }
 
-func (ctx *Context2D) StrokeText(text string, x, y, maxWidth int) {
+func (ctx *Context2D) StrokeText(text string, x, y, maxWidth interface{}) {
 	if maxWidth == -1 {
 		ctx.Call("strokeText", text, x, y)
 		return
