@@ -29,35 +29,41 @@ func newvc() *vcard {
 
 var (
 	template = `
-<div class="container">
-    <img data-bind="attr:{src:AvatarUrl}, visibale:AvatarUrl">
-    <div>
-        <div>
-            <span data-bind="text: FullName"></span>
-        </div>
-        <div data-bind="text: About">
-            
-        </div>
+    <img class="img" data-bind="attr:{src:AvatarUrl}" alt="No Pic Available">
+    <div class="info">
+        <div class="name" data-bind="text: FullName"></div>
+        <div class="about" data-bind="text: About"></div>
     </div>
-</div>
 `
 	cssRules = `
-    .container {
-      display: inline-block;
-      width: 19em;
-      height: 5.3em;
-      position: relative;
-      border-style: groove;
-      box-sizing: border-box;
-    }
-    .container > div {
-        position: absolute;
-        left: 5.1em;
-        top:0;
-    }
-    ko-vcard img {
+	ko-vcard {
+		display: inline-block;
+        border-style: groove;
+        box-sizing: border-box;
+        // min-width: 20em;
+        vertical-align:bottom;
+	}
+    ko-vcard .img {
         width: 4.8em;
         height: 4.8em;
+        float: left;
+    }
+    ko-vcard .name {
+    	font-size: 2em;
+		font-weight: bold;
+		padding-right: 0.2em;
+		text-align: end;
+    }
+    ko-vcard .info {
+		display: inline-block;
+        padding:0.2em;
+        width:15em;
+    }
+    ko-vcard .about {
+    	margin-top: 0.5em;
+  		margin-left: 0.5em;
+  		font-size: 0.5em;
+  		// text-indent: 2em;
     }
 `
 )
