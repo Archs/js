@@ -133,7 +133,7 @@ type CSSStyleDeclaration struct {
 
 func (css *CSSStyleDeclaration) ToMap() map[string]string {
 	m := make(map[string]string)
-	N := css.Get("length").Int()
+	N := css.Length
 	for i := 0; i < N; i++ {
 		name := css.Call("index", i).String()
 		value := css.Call("getPropertyValue").String()
@@ -181,6 +181,15 @@ type Element struct {
 	GetElementsByTagName func(tagName string) *HTMLCollection `js:"getElementsByTagName"`
 	QuerySelector        func(sel string) *Element            `js:"querySelector"`
 	QuerySelectorAll     func(sel string) *HTMLCollection     `js:"querySelectorAll"`
+
+	// Event handling
+
+	// Registers an event handler to a specific event type on the element.
+	//   If true, useCapture indicates that the user wishes to initiate capture.
+	//   After initiating capture, all events of the specified type will be dispatched to the registered listener before being dispatched to any EventTarget beneath it in the DOM tree.
+	//   Events which are bubbling upward through the tree will not trigger a listener designated to use capture.
+	AddEventListener    func(eventType string, listener func(*Event), useCapture ...bool) `js:"addEventListener"`
+	RemoveEventListener func(eventType string, listener func(*Event), useCapture ...bool) `js:"removeEventListener"`
 }
 
 // func (e *Element) Style() *CSSStyleDeclaration {
@@ -260,7 +269,8 @@ type Event struct {
 	Repeat        bool   `js:"repeat"`
 	ShiftKey      bool   `js:"shiftKey"`
 	// mouse event
-	Button    int `js:"button"`
+	Button int `js:"button"`
+	// mouse position
 	ClientX   int `js:"clientX"`
 	ClientY   int `js:"clientY"`
 	MovementX int `js:"movementX"`
@@ -302,26 +312,26 @@ type Event struct {
 	GetModifierState func(keyArg string) bool `js:"getModifierState"`
 }
 
-func (e *Element) AddEventListener(typ string, listener func(*Event), useCapture ...bool) func(*js.Object) {
-	capture := false
-	if len(useCapture) >= 1 {
-		capture = useCapture[0]
-	}
-	wrapper := func(o *js.Object) {
-		ev := &Event{Object: o}
-		listener(ev)
-	}
-	e.Call("addEventListener", typ, wrapper, capture)
-	return wrapper
-}
+// func (e *Element) AddEventListener(typ string, listener func(*Event), useCapture ...bool) func(*js.Object) {
+// 	capture := false
+// 	if len(useCapture) >= 1 {
+// 		capture = useCapture[0]
+// 	}
+// 	wrapper := func(o *js.Object) {
+// 		ev := &Event{Object: o}
+// 		listener(ev)
+// 	}
+// 	e.Call("addEventListener", typ, wrapper, capture)
+// 	return wrapper
+// }
 
-func (e *Element) RemoveEventListener(typ string, listener func(*js.Object), useCapture ...bool) {
-	capture := false
-	if len(useCapture) >= 1 {
-		capture = useCapture[0]
-	}
-	e.Call("removeEventListener", typ, listener, capture)
-}
+// func (e *Element) RemoveEventListener(typ string, listener func(*js.Object), useCapture ...bool) {
+// 	capture := false
+// 	if len(useCapture) >= 1 {
+// 		capture = useCapture[0]
+// 	}
+// 	e.Call("removeEventListener", typ, listener, capture)
+// }
 
 func OnLoad(callback func()) {
 	Window().AddEventListener(EvtLoad, func(*Event) {
