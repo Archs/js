@@ -111,7 +111,25 @@ const (
 
 )
 
-type CSSStyleDeclaration struct{ *js.Object }
+type CSSStyleDeclaration struct {
+	*js.Object
+	// Textual representation of the declaration block. Setting this attribute changes the style.
+	CssText string `js:"cssText"`
+	// CSSStyleDeclaration.length
+
+	// The number of properties. See the item method below.
+	Length int `js:"length"`
+	// CSSStyleDeclaration.parentRule
+
+	// The containing CssRule.
+	ParentRule *CSSStyleDeclaration `js:"parentRule"`
+
+	// funcs
+	RemoveProperty      func(name string)                            `js:"removeProperty"`
+	GetPropertyValue    func(name string) string                     `js:"getPropertyValue"`
+	GetPropertyPriority func(name string) string                     `js:"getPropertyPriority"`
+	SetProperty         func(name, value string, priority ...string) `js:"setProperty"`
+}
 
 func (css *CSSStyleDeclaration) ToMap() map[string]string {
 	m := make(map[string]string)
@@ -124,34 +142,6 @@ func (css *CSSStyleDeclaration) ToMap() map[string]string {
 	return m
 }
 
-func (css *CSSStyleDeclaration) RemoveProperty(name string) {
-	css.Call("removeProperty", name)
-}
-
-func (css *CSSStyleDeclaration) GetPropertyValue(name string) string {
-	return css.Call("getPropertyValue", name).String()
-}
-
-func (css *CSSStyleDeclaration) GetPropertyPriority(name string) string {
-	return css.Call("getPropertyPriority", name).String()
-}
-
-func (css *CSSStyleDeclaration) SetProperty(name, value string, priority ...string) {
-	if len(priority) >= 1 {
-		css.Call("setProperty", name, value, priority[0])
-	} else {
-		css.Call("setProperty", name, value, "important")
-	}
-}
-
-func (css *CSSStyleDeclaration) Index(idx int) string {
-	return css.Call("index", idx).String()
-}
-
-func (css *CSSStyleDeclaration) Length() int {
-	return css.Get("length").Int()
-}
-
 type Element struct {
 	*js.Object
 	// basic attr
@@ -160,10 +150,11 @@ type Element struct {
 	InnerText       string `js:"innerText"`
 	TagName         string `js:"tagName"`
 	ContentEditable bool   `js:"contentEditable"`
-	// width & height
+	// width & height, not all element supoort these attributes,
+	// use Style to set width/height
 	Width  int `js:"width"`
 	Height int `js:"height"`
-	// window size
+	// window size, for window object
 	InnerWidth  int `js:"innerWidth"`
 	InnerHeight int `js:"innerHeight"`
 	// dom
@@ -179,18 +170,33 @@ type Element struct {
 	ClassList []string             `js:"classList"`
 
 	// funcs
-	SetAttribute func(attr string, val interface{}) `js:"setAttribute"`
-	GetAttribute func(attr string) *js.Object       `js:"getAttribute"`
-	// func (e *Element) GetElementById(id string) *Element {
-	// 	obj := e.Call("getElementById", id)
-	// 	return Wrap(obj)
-	// }
-	GetElementById func(id string) *js.Object `js:"getElementById"`
+	SetAttribute    func(attr string, val interface{}) `js:"setAttribute"`
+	GetAttribute    func(attr string) *js.Object       `js:"getAttribute"`
+	RemoveAttribute func(attr string)                  `js:"removeAttribute"`
 
-	// func (e *Element) AppendChild(child *Element) {
-	// 	e.Call("appendChild", child.Object)
-	// }
 	AppendChild func(child *Element) `js:"appendChild"`
+	RemoveChild func(child *Element) `js:"removeChild"`
+	Remove      func()               `js:"remove"`
+
+	GetElementsByTagName func(tagName string) *HTMLCollection `js:"getElementsByTagName"`
+	QuerySelector        func(sel string) *Element            `js:"querySelector"`
+	QuerySelectorAll     func(sel string) *HTMLCollection     `js:"querySelectorAll"`
+}
+
+// func (e *Element) Style() *CSSStyleDeclaration {
+// 	return &CSSStyleDeclaration{
+// 		Object: e.Get("style"),
+// 	}
+// }
+
+type HTMLCollection struct {
+	*js.Object
+	// length Read only
+	// Returns the number of items in the collection.
+	Length int `js:"length"`
+	// HTMLCollection.item(index number)
+	// Returns the specific node at the given zero-based index into the list. Returns null if the index is out of range.
+	Item func(index int) *Element `js:"item"`
 }
 
 func Wrap(el *js.Object) *Element {
@@ -218,55 +224,12 @@ func CreateElement(tagName string) *Element {
 	return Wrap(obj)
 }
 
-// func GetElementById(id string) *Element {
-// 	return Document().GetElementById(id)
-// }
+func GetElementById(id string) *Element {
+	return Wrap(Document().Call("getElementById", id))
+}
 
 func Alert(msg string) {
 	js.Global.Call("alert", msg)
-}
-
-// func (e *Element) GetElementById(id string) *Element {
-// 	obj := e.Call("getElementById", id)
-// 	return Wrap(obj)
-// }
-
-// func (e *Element) AppendChild(child *Element) {
-// 	e.Call("appendChild", child.Object)
-// }
-
-func (e *Element) Remove() {
-	e.Call("remove")
-}
-
-func (e *Element) RemoveChild(child *Element) {
-	e.Call("removeChild", child.Object)
-}
-
-// func (e *Element) SetAttribute(attr string, val interface{}) {
-// 	e.Call("setAttribute", attr, val)
-// }
-
-// func (e *Element) GetAttribute(attr string) *js.Object {
-// 	return e.Call("getAttribute", attr)
-// }
-
-func (e *Element) RemoveAttribute(attr string) {
-	e.Call("removeAttribute", attr)
-}
-
-func (e *Element) QuerySelector(sel string) *Element {
-	obj := e.Call("querySelector", sel)
-	return Wrap(obj)
-}
-
-func (e *Element) QuerySelectorAll(sel string) []*Element {
-	var out []*Element
-	objs := e.Call("querySelectorAll", sel)
-	for i := 0; i < objs.Length(); i++ {
-		out = append(out, Wrap(objs.Index(i)))
-	}
-	return out
 }
 
 // Type Event implements the Event interface and is embedded by
@@ -311,52 +274,32 @@ type Event struct {
 	LayerY int `js:"layerY"`
 	// Returns the vertical coordinate of the event relative to the current layer.
 	// message event
-	Data js.Object `js:"data"`
-}
+	Data *js.Object `js:"data"`
 
-func (ev *Event) Bubbles() bool {
-	return ev.Get("bubbles").Bool()
-}
+	// Event control
 
-func (ev *Event) Cancelable() bool {
-	return ev.Get("cancelable").Bool()
-}
-
-func (ev *Event) CurrentTarget() *Element {
-	return Wrap(ev.Get("currentTarget"))
-}
-
-func (ev *Event) DefaultPrevented() bool {
-	return ev.Get("defaultPrevented").Bool()
-}
-
-func (ev *Event) EventPhase() int {
-	return ev.Get("eventPhase").Int()
-}
-
-func (ev *Event) Target() *Element {
-	return Wrap(ev.Get("target"))
-}
-
-// timestamp in ms
-func (ev *Event) Timestamp() int {
-	return ev.Get("timeStamp").Int()
-}
-
-func (ev *Event) PreventDefault() {
-	ev.Call("preventDefault")
-}
-
-func (ev *Event) StopImmediatePropagation() {
-	ev.Call("stopImmediatePropagation")
-}
-
-func (ev *Event) StopPropagation() {
-	ev.Call("stopPropagation")
-}
-
-func (ev *Event) ModifierState(mod string) bool {
-	return ev.Call("getModifierState", mod).Bool()
+	// A boolean indicating whether the event bubbles up through the DOM or not.
+	Bubbles bool `js:"bubbles"`
+	// A boolean indicating whether the event is cancelable.
+	Cancelable bool `js:"cancelable"`
+	// A reference to the currently registered target for the event.
+	CurrentTarget    *Element `js:"currentTarget"`
+	DefaultPrevented bool     `js:"defaultPrevented"`
+	// Indicates which phase of the event flow is being processed.
+	EventPhase int `js:"eventPhase"`
+	// A reference to the target to which the event was originally dispatched.
+	Target *Element `js:"target"`
+	// The time that the event was created. timestamp in ms
+	Timestamp                int    `js:"timeStamp"`
+	PreventDefault           func() `js:"preventDefault"`
+	StopImmediatePropagation func() `js:"stopImmediatePropagation"`
+	StopPropagation          func() `js:"stopPropagation"`
+	// The KeyboardEvent.getModifierState() method returns the current state of the specified modifier key,
+	// true if the modifier is active (that is the modifier key is pressed or locked), otherwise, false.
+	//
+	// keyArg
+	// 	A modifier key value. The value must be one of the KeyboardEvent.key values which represent modifier keys or "Accel". This is case-sensitive.
+	GetModifierState func(keyArg string) bool `js:"getModifierState"`
 }
 
 func (e *Element) AddEventListener(typ string, listener func(*Event), useCapture ...bool) func(*js.Object) {
