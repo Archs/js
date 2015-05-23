@@ -13,6 +13,6 @@ func Stringify(obj interface{}) string {
 	return json.Call("stringify", obj).String()
 }
 
-func Parse(jsonStr string) js.Object {
+func Parse(jsonStr string) *js.Object {
 	return json.Call("parse", jsonStr)
 }
