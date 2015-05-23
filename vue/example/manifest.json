@@ -1,0 +1,10 @@
+{
+  "name": "Vue Test",
+  "version": "1.1",
+  "description": "Test for vue in chrome.",
+  "browser_action": {
+    "default_title": "Vue",
+    "default_popup": "test.html"
+  },
+  "manifest_version": 2
+}
