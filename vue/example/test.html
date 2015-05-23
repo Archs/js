@@ -1,5 +1,6 @@
 <div id="demo" v-cloak>
   <h1>{{title | uppercase}}</h1>
+  <input v-model="title"> <button v-on="click: change">Change</button>
   <ul>
     <li
       v-repeat="todos"
