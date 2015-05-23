@@ -513,7 +513,7 @@ type Unwatcher func()
 //
 // Watch an expression on the Vue instance for changes.
 // The expression can be a single keypath or actual expressions:
-func (v *Vue) Watch(expression string, callback func(newVal, oldVal js.Object), deepWatch bool) Unwatcher {
+func (v *Vue) Watch(expression string, callback func(newVal, oldVal *js.Object), deepWatch bool) Unwatcher {
 	obj := v.Call("$watch", expression, callback, deepWatch)
 	return func() {
 		obj.Invoke()
