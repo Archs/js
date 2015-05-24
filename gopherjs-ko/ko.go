@@ -5,9 +5,6 @@ package ko
 
 import "github.com/gopherjs/gopherjs/js"
 
-// type Disposable interface {
-// 	Dispose()
-// }
 type Disposable func()
 
 type Observable struct {
@@ -42,59 +39,59 @@ func (ob *Observable) Extend(params js.M) *Observable {
 	return ob
 }
 
-func (ob *Observable) IndexOf(data interface{}) int {
+func (ob *ObservableArray) IndexOf(data interface{}) int {
 	return ob.Call("indexOf", data).Int()
 }
 
-func (ob *Observable) Pop() *js.Object {
+func (ob *ObservableArray) Pop() *js.Object {
 	return ob.Call("pop")
 }
 
-func (ob *Observable) Unshift(data interface{}) {
+func (ob *ObservableArray) Unshift(data interface{}) {
 	ob.Call("unshift", data)
 }
 
-func (ob *Observable) Shift() *js.Object {
+func (ob *ObservableArray) Shift() *js.Object {
 	return ob.Call("shift")
 }
 
-func (ob *Observable) Reverse() {
+func (ob *ObservableArray) Reverse() {
 	ob.Call("reverse")
 }
 
-func (ob *Observable) Sort() {
+func (ob *ObservableArray) Sort() {
 	ob.Call("sort")
 }
 
-func (ob *Observable) SortFunc(fn func(*js.Object, *js.Object)) {
+func (ob *ObservableArray) SortFunc(fn func(*js.Object, *js.Object)) {
 	ob.Call("sort", fn)
 }
 
-func (ob *Observable) Splice(i, n int) *js.Object {
+func (ob *ObservableArray) Splice(i, n int) *js.Object {
 	return ob.Call("splice", i, n)
 }
 
-func (ob *Observable) RemoveAll(items ...interface{}) *js.Object {
+func (ob *ObservableArray) RemoveAll(items ...interface{}) *js.Object {
 	return ob.Call("removeAll", items...)
 }
 
-func (ob ObservableArray) Index(i int) *js.Object {
+func (ob *ObservableArray) Index(i int) *js.Object {
 	return ob.Get().Index(i)
 }
 
-func (ob ObservableArray) Length() int {
+func (ob *ObservableArray) Length() int {
 	return ob.Get().Length()
 }
 
-func (ob ObservableArray) Push(data interface{}) {
+func (ob *ObservableArray) Push(data interface{}) {
 	ob.Call("push", data)
 }
 
-func (ob ObservableArray) Remove(item interface{}) *js.Object {
+func (ob *ObservableArray) Remove(item interface{}) *js.Object {
 	return ob.Call("remove", item)
 }
 
-func (ob ObservableArray) RemoveFunc(fn func(*js.Object) bool) *js.Object {
+func (ob *ObservableArray) RemoveFunc(fn func(*js.Object) bool) *js.Object {
 	return ob.Call("remove", fn)
 }
 
