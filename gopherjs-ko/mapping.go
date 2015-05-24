@@ -23,20 +23,25 @@ func Mapping() *Mapper {
 
 func (m *Mapper) FromJS(data interface{}) (model *ViewModel) {
 	model = new(ViewModel)
+	args := []interface{}{data}
 	if m.options != nil {
-		model.Object = m.Object.Call("fromJS", data, m.options)
-	} else {
-		model.Object = m.Object.Call("fromJS", data)
+		args = append(args, m.options)
 	}
+	if m.target != nil {
+		if m.options == nil {
+			args = append(args, js.M{})
+		}
+		args = append(args, m.target)
+	}
+	model.Object = m.Object.Call("fromJS", args...)
 	return
 }
 
 // Specifying the update target
-// TODO implements Target
-// func (m *Mapper) Target(obj *js.Object) *Mapper {
-// 	m.target = obj
-// 	return m
-// }
+func (m *Mapper) Target(obj *js.Object) *Mapper {
+	m.target = obj
+	return m
+}
 
 func (v *ViewModel) Update(data interface{}) *ViewModel {
 	Mapping().Call("fromJS", data, v.Object)
