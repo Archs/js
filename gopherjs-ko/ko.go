@@ -15,68 +15,66 @@ type Observable struct {
 }
 
 type ObservableArray struct {
-	Observable
+	*Observable
 }
 
 type Computed struct {
-	Observable
+	*Observable
 }
 
-func (ob Observable) Dispose() {
-	ob.Call("dispose")
-}
-
-func (ob Observable) Set(data interface{}) {
+func (ob *Observable) Set(data interface{}) {
 	ob.Object.Invoke(data)
 }
 
-func (ob Observable) Get() *js.Object {
+func (ob *Observable) Get() *js.Object {
 	return ob.Invoke()
 }
 
-func (ob Observable) Subscribe(fn func(*js.Object)) Disposable {
-	o := Observable{ob.Call("subscribe", fn)}
-	return o.Dispose
+func (ob *Observable) Subscribe(fn func(*js.Object)) Disposable {
+	o := ob.Call("subscribe", fn)
+	return func() {
+		o.Invoke()
+	}
 }
 
-func (ob Observable) Extend(params js.M) Observable {
+func (ob *Observable) Extend(params js.M) *Observable {
 	ob.Call("extend", params)
 	return ob
 }
 
-func (ob Observable) IndexOf(data interface{}) int {
+func (ob *Observable) IndexOf(data interface{}) int {
 	return ob.Call("indexOf", data).Int()
 }
 
-func (ob Observable) Pop() *js.Object {
+func (ob *Observable) Pop() *js.Object {
 	return ob.Call("pop")
 }
 
-func (ob Observable) Unshift(data interface{}) {
+func (ob *Observable) Unshift(data interface{}) {
 	ob.Call("unshift", data)
 }
 
-func (ob Observable) Shift() *js.Object {
+func (ob *Observable) Shift() *js.Object {
 	return ob.Call("shift")
 }
 
-func (ob Observable) Reverse() {
+func (ob *Observable) Reverse() {
 	ob.Call("reverse")
 }
 
-func (ob Observable) Sort() {
+func (ob *Observable) Sort() {
 	ob.Call("sort")
 }
 
-func (ob Observable) SortFunc(fn func(*js.Object, *js.Object)) {
+func (ob *Observable) SortFunc(fn func(*js.Object, *js.Object)) {
 	ob.Call("sort", fn)
 }
 
-func (ob Observable) Splice(i, n int) *js.Object {
+func (ob *Observable) Splice(i, n int) *js.Object {
 	return ob.Call("splice", i, n)
 }
 
-func (ob Observable) RemoveAll(items ...interface{}) *js.Object {
+func (ob *Observable) RemoveAll(items ...interface{}) *js.Object {
 	return ob.Call("removeAll", items...)
 }
 
@@ -118,18 +116,18 @@ func Global() *js.Object {
 	return js.Global.Get("ko")
 }
 
-func NewObservable(data interface{}) Observable {
-	return Observable{
+func NewObservable(data interface{}) *Observable {
+	return &Observable{
 		Object: Global().Call("observable", data),
 	}
 }
 
-func NewObservableArray(data interface{}) ObservableArray {
-	return ObservableArray{Observable{Global().Call("observableArray", data)}}
+func NewObservableArray(data interface{}) *ObservableArray {
+	return &ObservableArray{&Observable{Global().Call("observableArray", data)}}
 }
 
-func NewComputed(fn func() interface{}) Computed {
-	return Computed{Observable{Global().Call("computed", fn)}}
+func NewComputed(fn func() interface{}) *Computed {
+	return &Computed{&Observable{Global().Call("computed", fn)}}
 }
 
 // RegisterURLTemplateLoader register a new template loader which can be used to load

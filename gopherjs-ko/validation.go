@@ -3,11 +3,11 @@ package ko
 import "github.com/gopherjs/gopherjs/js"
 
 type ValidatedObservable struct {
-	Observable
+	*Observable
 }
 
-func NewValidatedObservable(data interface{}) ValidatedObservable {
-	return ValidatedObservable{Observable{Global().Call("validatedObservable", data)}}
+func NewValidatedObservable(data interface{}) *ValidatedObservable {
+	return &ValidatedObservable{&Observable{Global().Call("validatedObservable", data)}}
 }
 
 func (ob *ValidatedObservable) IsValid() bool {
