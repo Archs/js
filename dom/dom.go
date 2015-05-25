@@ -5,12 +5,6 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-var (
-	document = js.Global.Get("document")
-	Doc      = &Element{Object: document}
-	Body     = &Element{Object: document.Get("body")}
-)
-
 const (
 	// Wheel Delta
 	DeltaPixel = 0
@@ -135,18 +129,30 @@ type Element struct {
 	LastElementChild       *Element `js:"lastElementChild"`
 }
 
+func Wrap(el *js.Object) *Element {
+	return &Element{Object: el}
+}
+
+func Window() *Element {
+	return Wrap(js.Global)
+}
+
+func Document() *Element {
+	return Wrap(js.Global.Get("document"))
+}
+
+func Body() *Element {
+	return Wrap(Document().Get("body"))
+}
+
 func CreateElement(tagName string) *Element {
-	obj := document.Call("createElement", tagName)
-	return &Element{Object: obj}
+	obj := Document().Call("createElement", tagName)
+	return Wrap(obj)
 }
 
 func GetElementById(id string) *Element {
-	obj := document.Call("getElementById", id)
-	return &Element{Object: obj}
-}
-
-func HtmlElement(el *js.Object) *Element {
-	return &Element{Object: el}
+	obj := Document().Call("getElementById", id)
+	return Wrap(obj)
 }
 
 func Alert(msg string) {
@@ -292,7 +298,7 @@ func (e *Element) RemoveEventListener(typ string, listener func(*js.Object), use
 }
 
 func OnLoad(callback func()) {
-	Doc.AddEventListener(EvtLoad, func(*Event) {
+	Window().AddEventListener(EvtLoad, func(*Event) {
 		callback()
 	}, false)
 }
@@ -301,7 +307,7 @@ func OnLoad(callback func()) {
 // that is without stylesheets* and additional images.
 // If you need to wait for images and stylesheets, use "load" instead.
 func OnDOMContentLoaded(callback func()) {
-	Doc.AddEventListener(EvtDOMContentLoaded, func(*Event) {
+	Window().AddEventListener(EvtDOMContentLoaded, func(*Event) {
 		callback()
 	}, false)
 }
