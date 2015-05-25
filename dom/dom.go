@@ -185,14 +185,14 @@ func (e *Element) RemoveAttribute(attr string) {
 
 func (e *Element) QuerySelector(sel string) *Element {
 	obj := e.Call("querySelector", sel)
-	return &Element{Object: obj}
+	return Wrap(obj)
 }
 
 func (e *Element) QuerySelectorAll(sel string) []*Element {
 	var out []*Element
 	objs := e.Call("querySelectorAll", sel)
 	for i := 0; i < objs.Length(); i++ {
-		out = append(out, &Element{Object: objs.Index(i)})
+		out = append(out, Wrap(objs.Index(i)))
 	}
 	return out
 }
@@ -201,6 +201,7 @@ func (e *Element) QuerySelectorAll(sel string) []*Element {
 // concrete event types.
 type Event struct {
 	*js.Object
+	Type string `js:"type"`
 	// close event
 	Code     int    `js:"code"`
 	Reason   string `js:"reason"`
@@ -244,7 +245,7 @@ func (ev *Event) Cancelable() bool {
 }
 
 func (ev *Event) CurrentTarget() *Element {
-	return &Element{Object: ev.Get("currentTarget")}
+	return Wrap(ev.Get("currentTarget"))
 }
 
 func (ev *Event) DefaultPrevented() bool {
@@ -256,16 +257,12 @@ func (ev *Event) EventPhase() int {
 }
 
 func (ev *Event) Target() *Element {
-	return &Element{Object: ev.Get("target")}
+	return Wrap(ev.Get("target"))
 }
 
 // timestamp in ms
 func (ev *Event) Timestamp() int {
 	return ev.Get("timeStamp").Int()
-}
-
-func (ev *Event) Type() string {
-	return ev.Get("type").String()
 }
 
 func (ev *Event) PreventDefault() {
