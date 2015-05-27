@@ -1,6 +1,8 @@
 package clock
 
 import (
+	"github.com/Archs/js/canvas"
+	"github.com/Archs/js/dom"
 	"github.com/Archs/js/gopherjs-ko"
 	"github.com/gopherjs/gopherjs/js"
 	"time"
@@ -19,8 +21,8 @@ func newCtrl() *ctrl {
 	return c
 }
 
-func registerClock() {
-	ko.Components().Register("clock", js.M{
+func registerTest() {
+	ko.Components().Register("test", js.M{
 		"template": "<h2>Clock</h2><button data-bind='click:click'>Click</button><span data-bind='text:msg'></span>",
 		"viewModel": func(p *js.Object) *ctrl {
 			println("viewModel", p)
@@ -31,6 +33,25 @@ func registerClock() {
 				c.msg.Set(time.Now().String())
 			}
 			return c
+		},
+	})
+}
+
+func registerClock() {
+	ko.Components().Register("clock", js.M{
+		"template": "<canvas></canvas>",
+		"viewModel": js.M{
+			"createViewModel": func(params, info *js.Object) {
+				el := dom.Wrap(info.Get("element"))
+				el = el.QuerySelector("canvas")
+				c := canvas.New(el.Object)
+				c.Width = 20
+				c.Height = 20
+				ctx := c.GetContext2D()
+				ctx.FillStyle = "red"
+				ctx.FillRect(0, 0, 20, 20)
+				println(params, info, el, c, ctx)
+			},
 		},
 	})
 }
