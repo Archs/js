@@ -127,6 +127,8 @@ type Element struct {
 	NextElementSibling     *Element `js:"nextElementSibling"`
 	FirstElementChild      *Element `js:"firstElementChild"`
 	LastElementChild       *Element `js:"lastElementChild"`
+	// img, script
+	Src string `js:"src"`
 }
 
 func Wrap(el *js.Object) *Element {
