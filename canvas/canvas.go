@@ -7,7 +7,7 @@ package canvas
 import (
 	"github.com/Archs/js/dom"
 	"github.com/gopherjs/gopherjs/js"
-	"image"
+	"image/color"
 )
 
 const (
@@ -47,6 +47,13 @@ const (
 	// copy
 	// 只有新图形会被保留，其它都被清除掉。
 	CompositeCopy = "copy"
+)
+
+const (
+	PatternRepeat   = "repeat"    // (both directions),
+	PatternRepeatX  = "repeat-x"  // (horizontal only),
+	PatternRepeatY  = "repeat-y"  // (vertical only), or
+	PatternNoRepeat = "no-repeat" // (neither).
 )
 
 // canvas元素也可以通过应用CSS的方式来增加边框，设置内边距、外边距等，
@@ -460,19 +467,109 @@ func (ctx *Context2D) Restore() {
 //
 // image参数可以是HTMLImageElement、HTMLCanvasElement或者HTMLVideoElement。
 func (ctx *Context2D) DrawImage(image *dom.Element, dx, dy, dw, dh int) {
-	ctx.Call("drawImage")
+	ctx.Call("drawImage", image, dx, dy, dw, dh)
 }
 
-func (c *Context2D) GetImage(x, y, width, heigth int) image.Image {
-	im := c.Call("getImageData", x, y, width, heigth)
-	data := js.Global.Get("Uint8Array").New(im.Get("data")).Interface().([]uint8)
-	rgba := new(image.RGBA)
-	rgba.Pix = data
-	rgba.Stride = width
-	rgba.Rect = image.Rect(0, 0, width, heigth)
+type ImageData struct {
+	*js.Object
+	// ImageData.data Read only
+	// Is a Uint8ClampedArray representing a one-dimensional array containing the data in the RGBA order, with integer values between 0 and 255 (included).
+	Data *js.Object `js:"data"`
+	// ImageData.height Read only
+	// Is an unsigned long representing the actual height, in pixels, of the ImageData.
+	Height int `js:"height"`
+	// ImageData.width Read only
+	// Is an unsigned long representing the actual width, in pixels, of the ImageData.
+	Width int `js:"width"`
+}
+
+func (i *ImageData) Bytes() []byte {
+	return js.Global.Get("Uint8Array").New(i.Data).Interface().([]byte)
+}
+
+func (i *ImageData) At(x, y int) *color.RGBA {
+	idx := 4 * (y*i.Width + x)
+	rgba := &color.RGBA{}
+	rgba.R = uint8(i.Data.Index(idx).Int())
+	rgba.G = uint8(i.Data.Index(idx + 1).Int())
+	rgba.B = uint8(i.Data.Index(idx + 2).Int())
+	rgba.A = uint8(i.Data.Index(idx + 3).Int())
+	println("at:", x, y, rgba)
 	return rgba
 }
 
-func (c *Context2D) PutImage() {
+func (i *ImageData) Set(x, y int, c color.RGBA) {
+	idx := 4 * (y*i.Width + x)
+	i.Data.SetIndex(idx, c.R)
+	i.Data.SetIndex(idx+1, c.G)
+	i.Data.SetIndex(idx+2, c.B)
+	i.Data.SetIndex(idx+3, c.A)
+}
 
+// func (i *ImageData) Image() image.Image {
+// 	data := js.Global.Get("Uint8Array").New(i.Data).Interface().([]uint8)
+// 	rgba := new(image.RGBA)
+// 	rgba.Pix = data
+// 	rgba.Stride = i.Width * 4
+// 	rgba.Rect = image.Rect(0, 0, i.Width, i.Height)
+// 	return rgba
+// }
+
+// The CanvasRenderingContext2D.createImageData() method of the Canvas 2D API creates a new, blank ImageData object with the specified dimensions.
+// All of the pixels in the new object are transparent black.
+// Syntax
+// ImageData ctx.createImageData(width, height);
+// ImageData ctx.createImageData(imagedata);
+// Parameters
+// width
+// 	The width to give the new ImageData object.
+// height
+// 	The height to give the new ImageData object.
+func (ctx *Context2D) CreateImageData(width, height int) *ImageData {
+	o := ctx.Call("createImageData", width, height)
+	im := &ImageData{Object: o}
+	return im
+}
+
+// The CanvasRenderingContext2D.getImageData() method of the Canvas 2D API returns an ImageData object
+// representing the underlying pixel data for the area of the canvas
+// denoted by the rectangle which starts at (sx, sy) and has an sw width and sh height.
+// sx
+// 	The x coordinate of the upper left corner of the rectangle from which the ImageData will be extracted.
+// sy
+// 	The y coordinate of the upper left corner of the rectangle from which the ImageData will be extracted.
+// sw
+// 	The width of the rectangle from which the ImageData will be extracted.
+// sh
+// 	The height of the rectangle from which the ImageData will be extracted.
+func (c *Context2D) GetImageData(x, y, width, heigth int) *ImageData {
+	o := c.Call("getImageData", x, y, width, heigth)
+	return &ImageData{Object: o}
+}
+
+// The CanvasRenderingContext2D.putImageData() method of the Canvas 2D API paints data from the given ImageData object onto the bitmap. If a dirty rectangle is provided, only the pixels from that rectangle are painted.
+
+// Syntax
+// void ctx.putImageData(imagedata, dx, dy);
+// void ctx.putImageData(imagedata, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+// imageData
+// 	An ImageData object containing the array of pixel values.
+// dx
+// 	Position offset in the target canvas context of the rectangle to be painted, relative to the rectangle in the origin image data.
+// dy
+// 	Position offset in the target canvas context of the rectangle to be painted, relative to the rectangle in the origin image data.
+// dirtyX Optional
+// 	Position of the top left point of the rectangle to be painted, in the origin image data. Defaults to the top left of the whole image data.
+// dirtyY Optional
+// 	Position of the top left point of the rectangle to be painted, in the origin image data. Defaults to the top left of the whole image data.
+// dirtyWidth Optional
+// 	Width of the rectangle to be painted, in the origin image data. Defaults to the width of the image data.
+// dirtyHeight Optional
+// 	Height of the rectangle to be painted, in the origin image data. Defaults to the height of the image data.
+func (c *Context2D) PutImageData(imd *ImageData, x, y int, dirtyX ...int) {
+	args := []interface{}{imd.Object, x, y}
+	for _, v := range dirtyX {
+		args = append(args, v)
+	}
+	c.Call("putImageData", args...)
 }

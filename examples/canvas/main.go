@@ -1,30 +1,45 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Archs/js/canvas"
 	"github.com/Archs/js/dom"
 )
 
-func main() {
+func test() {
+	span := dom.CreateElement("span")
+	dom.Body().AppendChild(span)
 	el := dom.GetElementById("canvas")
 	c := canvas.New(el.Object)
-	c.Width = 400
-	c.Height = 400
 	ctx := c.GetContext2D()
 	img := dom.CreateElement("img")
-	img.Src = "img/Canvas_createpattern.png"
+	img.Src = "img/bull.png"
 	img.AddEventListener(dom.EvtLoad, func(e *dom.Event) {
-		p := ctx.CreatePattern(img, "repeat")
-		ctx.FillStyle = p.Value()
-		ctx.FillRect(0, 0, 400, 400)
-		im := ctx.GetImage(0, 0, 20, 20)
-		println(im.At(0, 0).RGBA())
-		println(im.At(0, 10).RGBA())
-		println(im, im.At(0, 0), im.Bounds())
-		// g := ctx.CreateRadialGradient(100, 100, 100, 100, 100, 0)
-		// g.AddColorStop(0.0, "white")
-		// g.AddColorStop(1.0, "green")
-		// ctx.FillStyle = g.Value()
-		// ctx.FillRect(0, 0, 200, 200)
+		// p := ctx.CreatePattern(img, canvas.PatternNoRepeat)
+		// ctx.FillStyle = p.Value()
+		// ctx.FillRect(0, 0, 400, 400)
+		// im := ctx.GetImageData(0, 0, 20, 20)
+		// println("im20:", im, im.Data, im.Width, im.Height)
+		// println(im.At(0, 0))
+		// println(im.At(0, 10))
+		// println(im, im.At(0, 0))
+		println(img, 0, 0, img.Width, img.Height)
+		el.Width = img.Width
+		el.Height = img.Height
+		ctx.DrawImage(img, 0, 0, img.Width, img.Height)
 	})
+	el.AddEventListener(dom.EvtMousemove, func(e *dom.Event) {
+		println("mouse:", e.LayerX, e.LayerY)
+		im := ctx.GetImageData(e.LayerX, e.LayerY, 1, 1)
+		println("im1:", im, im.Data, im.Width, im.Height)
+		c := im.At(0, 0)
+		println(c)
+		value := fmt.Sprintf("rgba(%d,%d,%d,%d)", c.R, c.G, c.B, c.A)
+		span.Style.SetProperty("background", value)
+		span.InnerText = value
+	})
+}
+
+func main() {
+	dom.OnDOMContentLoaded(test)
 }
