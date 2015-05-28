@@ -472,3 +472,7 @@ func (c *Context2D) GetImage(x, y, width, heigth int) image.Image {
 	rgba.Rect = image.Rect(0, 0, width, heigth)
 	return rgba
 }
+
+func (c *Context2D) PutImage() {
+
+}
