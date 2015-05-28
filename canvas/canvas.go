@@ -465,12 +465,10 @@ func (ctx *Context2D) DrawImage(image *dom.Element, dx, dy, dw, dh int) {
 
 func (c *Context2D) GetImage(x, y, width, heigth int) image.Image {
 	im := c.Call("getImageData", x, y, width, heigth)
-	width = im.Get("width").Int()
-	heigth = im.Get("heigth").Int()
-	data := im.Get("data").Interface().([]byte)
+	data := js.Global.Get("Uint8Array").New(im.Get("data")).Interface().([]uint8)
 	rgba := new(image.RGBA)
 	rgba.Pix = data
-	rgba.Stride = width * 4
+	rgba.Stride = width
 	rgba.Rect = image.Rect(0, 0, width, heigth)
 	return rgba
 }
