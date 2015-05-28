@@ -164,31 +164,31 @@ func (ctx *Context2D) CreateLinearGradient(x0, y0, x1, y1 int) *Gradient {
 
 // The CanvasRenderingContext2D.createRadialGradient() method of the Canvas 2D API creates a radial gradient given by the coordinates of the two circles represented by the parameters. This method returns a CanvasGradient.
 //
-// Syntax
-// CanvasGradient ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);
+//	 Syntax
+//	 	CanvasGradient ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);
 //
-// x0
-//	 The x axis of the coordinate of the start circle.
-// y0
-//	 The y axis of the coordinate of the start circle.
-// r0
-//	 The radius of the start circle.
-// x1
-//	 The x axis of the coordinate of the end circle.
-// y1
-//	 The y axis of the coordinate of the end circle.
-// r1
-//	 The radius of the end circle.
+//	 x0
+//		 The x axis of the coordinate of the start circle.
+//	 y0
+//		 The y axis of the coordinate of the start circle.
+//	 r0
+//		 The radius of the start circle.
+//	 x1
+//		 The x axis of the coordinate of the end circle.
+//	 y1
+//		 The y axis of the coordinate of the end circle.
+//	 r1
+//		 The radius of the end circle.
 //
-// example:
-//		var canvas = document.getElementById("canvas");
-//		var ctx = canvas.getContext("2d");
+//	 example:
+//			var canvas = document.getElementById("canvas");
+//			var ctx = canvas.getContext("2d");
 //
-//		var gradient = ctx.createRadialGradient(100,100,100,100,100,0);
-//		gradient.addColorStop(0,"white");
-//		gradient.addColorStop(1,"green");
-//		ctx.fillStyle = gradient;
-//		ctx.fillRect(0,0,200,200);
+//			var gradient = ctx.createRadialGradient(100,100,100,100,100,0);
+//			gradient.addColorStop(0,"white");
+//			gradient.addColorStop(1,"green");
+//			ctx.fillStyle = gradient;
+//	 		ctx.fillRect(0,0,200,200);
 func (ctx *Context2D) CreateRadialGradient(x0, y0, r0, x1, y1, r1 int) *Gradient {
 	o := ctx.Call("createRadialGradient", x0, y0, r0, x1, y1, r1)
 	return &Gradient{o: o}
@@ -207,36 +207,36 @@ func (p *Pattern) Value() *js.Object {
 // The CanvasRenderingContext2D.createPattern() method of the Canvas 2D API creates a pattern using the specified image (a CanvasImageSource).
 // It repeats the source in the directions specified by the repetition argument. This method returns a CanvasPattern.
 //
-// Syntax
-// CanvasPattern ctx.createPattern(image, repetition);
+// 	Syntax
+// 	CanvasPattern ctx.createPattern(image, repetition);
 //
-// image
-// 		A CanvasImageSource to be used as image to repeat. It can either be a:
-// 		HTMLImageElement (<img>),
-// 		HTMLVideoElement (<video>),
-// 		HTMLCanvasElement (<canvas>),
-// 		CanvasRenderingContext2D,
-// 		ImageBitmap,
-// 		ImageData, or a
-// 		Blob.
-// repetition
-// 		A DOMString indicating how to repeat the image. Possible values are:
-// 		"repeat" (both directions),
-// 		"repeat-x" (horizontal only),
-// 		"repeat-y" (vertical only), or
-// 		"no-repeat" (neither).
-// 		If repetition is an empty string ('') or null (but not undefined), repetition will be "repeat".
-// example
-// 		var canvas = document.getElementById("canvas");
-// 		var ctx = canvas.getContext("2d");
+// 	image
+// 			A CanvasImageSource to be used as image to repeat. It can either be a:
+// 			HTMLImageElement (<img>),
+// 			HTMLVideoElement (<video>),
+// 			HTMLCanvasElement (<canvas>),
+// 			CanvasRenderingContext2D,
+// 			ImageBitmap,
+// 			ImageData, or a
+// 			Blob.
+// 	repetition
+// 			A DOMString indicating how to repeat the image. Possible values are:
+// 			"repeat" (both directions),
+// 			"repeat-x" (horizontal only),
+// 			"repeat-y" (vertical only), or
+// 			"no-repeat" (neither).
+// 			If repetition is an empty string ('') or null (but not undefined), repetition will be "repeat".
+// 	example
+// 			var canvas = document.getElementById("canvas");
+// 			var ctx = canvas.getContext("2d");
 //
-// 		var img = new Image();
-// 		img.src = 'https://mdn.mozillademos.org/files/222/Canvas_createpattern.png';
-// 		img.onload = function() {
-// 		  var pattern = ctx.createPattern(img, 'repeat');
-// 		  ctx.fillStyle = pattern;
-// 		  ctx.fillRect(0,0,400,400);
-// 		};
+// 			var img = new Image();
+// 			img.src = 'https://mdn.mozillademos.org/files/222/Canvas_createpattern.png';
+// 			img.onload = function() {
+// 			  var pattern = ctx.createPattern(img, 'repeat');
+// 			  ctx.fillStyle = pattern;
+// 			  ctx.fillRect(0,0,400,400);
+// 			};
 func (ctx *Context2D) CreatePattern(image interface{}, repetition string) *Pattern {
 	o := ctx.Call("createPattern", image, repetition)
 	return &Pattern{o: o}
@@ -517,14 +517,14 @@ func (i *ImageData) Set(x, y int, c color.RGBA) {
 
 // The CanvasRenderingContext2D.createImageData() method of the Canvas 2D API creates a new, blank ImageData object with the specified dimensions.
 // All of the pixels in the new object are transparent black.
-// Syntax
-// ImageData ctx.createImageData(width, height);
-// ImageData ctx.createImageData(imagedata);
-// Parameters
-// width
-// 	The width to give the new ImageData object.
-// height
-// 	The height to give the new ImageData object.
+// 	Syntax
+// 	ImageData ctx.createImageData(width, height);
+// 	ImageData ctx.createImageData(imagedata);
+// 	Parameters
+// 	width
+// 		The width to give the new ImageData object.
+// 	height
+// 		The height to give the new ImageData object.
 func (ctx *Context2D) CreateImageData(width, height int) *ImageData {
 	o := ctx.Call("createImageData", width, height)
 	im := &ImageData{Object: o}
@@ -534,14 +534,14 @@ func (ctx *Context2D) CreateImageData(width, height int) *ImageData {
 // The CanvasRenderingContext2D.getImageData() method of the Canvas 2D API returns an ImageData object
 // representing the underlying pixel data for the area of the canvas
 // denoted by the rectangle which starts at (sx, sy) and has an sw width and sh height.
-// sx
-// 	The x coordinate of the upper left corner of the rectangle from which the ImageData will be extracted.
-// sy
-// 	The y coordinate of the upper left corner of the rectangle from which the ImageData will be extracted.
-// sw
-// 	The width of the rectangle from which the ImageData will be extracted.
-// sh
-// 	The height of the rectangle from which the ImageData will be extracted.
+//   sx
+//    The x coordinate of the upper left corner of the rectangle from which the ImageData will be extracted.
+//   sy
+//   	The y coordinate of the upper left corner of the rectangle from which the ImageData will be extracted.
+//   sw
+//   	The width of the rectangle from which the ImageData will be extracted.
+//   sh
+//   	The height of the rectangle from which the ImageData will be extracted.
 func (c *Context2D) GetImageData(x, y, width, heigth int) *ImageData {
 	o := c.Call("getImageData", x, y, width, heigth)
 	return &ImageData{Object: o}
@@ -552,20 +552,20 @@ func (c *Context2D) GetImageData(x, y, width, heigth int) *ImageData {
 // Syntax
 // void ctx.putImageData(imagedata, dx, dy);
 // void ctx.putImageData(imagedata, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
-// imageData
-// 	An ImageData object containing the array of pixel values.
-// dx
-// 	Position offset in the target canvas context of the rectangle to be painted, relative to the rectangle in the origin image data.
-// dy
-// 	Position offset in the target canvas context of the rectangle to be painted, relative to the rectangle in the origin image data.
-// dirtyX Optional
-// 	Position of the top left point of the rectangle to be painted, in the origin image data. Defaults to the top left of the whole image data.
-// dirtyY Optional
-// 	Position of the top left point of the rectangle to be painted, in the origin image data. Defaults to the top left of the whole image data.
-// dirtyWidth Optional
-// 	Width of the rectangle to be painted, in the origin image data. Defaults to the width of the image data.
-// dirtyHeight Optional
-// 	Height of the rectangle to be painted, in the origin image data. Defaults to the height of the image data.
+// 	imageData
+// 		An ImageData object containing the array of pixel values.
+// 	dx
+// 		Position offset in the target canvas context of the rectangle to be painted, relative to the rectangle in the origin image data.
+// 	dy
+// 		Position offset in the target canvas context of the rectangle to be painted, relative to the rectangle in the origin image data.
+// 	dirtyX Optional
+// 		Position of the top left point of the rectangle to be painted, in the origin image data. Defaults to the top left of the whole image data.
+// 	dirtyY Optional
+// 		Position of the top left point of the rectangle to be painted, in the origin image data. Defaults to the top left of the whole image data.
+// 	dirtyWidth Optional
+// 		Width of the rectangle to be painted, in the origin image data. Defaults to the width of the image data.
+// 	dirtyHeight Optional
+// 		Height of the rectangle to be painted, in the origin image data. Defaults to the height of the image data.
 func (c *Context2D) PutImageData(imd *ImageData, x, y int, dirtyX ...int) {
 	args := []interface{}{imd.Object, x, y}
 	for _, v := range dirtyX {
