@@ -111,6 +111,47 @@ const (
 
 )
 
+type CSSStyleDeclaration struct{ *js.Object }
+
+func (css *CSSStyleDeclaration) ToMap() map[string]string {
+	m := make(map[string]string)
+	N := css.Get("length").Int()
+	for i := 0; i < N; i++ {
+		name := css.Call("index", i).String()
+		value := css.Call("getPropertyValue").String()
+		m[name] = value
+	}
+	return m
+}
+
+func (css *CSSStyleDeclaration) RemoveProperty(name string) {
+	css.Call("removeProperty", name)
+}
+
+func (css *CSSStyleDeclaration) GetPropertyValue(name string) string {
+	return css.Call("getPropertyValue", name).String()
+}
+
+func (css *CSSStyleDeclaration) GetPropertyPriority(name string) string {
+	return css.Call("getPropertyPriority", name).String()
+}
+
+func (css *CSSStyleDeclaration) SetProperty(name, value string, priority ...string) {
+	if len(priority) >= 1 {
+		css.Call("setProperty", name, value, priority[0])
+	} else {
+		css.Call("setProperty", name, value, "important")
+	}
+}
+
+func (css *CSSStyleDeclaration) Index(idx int) string {
+	return css.Call("index", idx).String()
+}
+
+func (css *CSSStyleDeclaration) Length() int {
+	return css.Get("length").Int()
+}
+
 type Element struct {
 	*js.Object
 	// basic attr
@@ -129,6 +170,8 @@ type Element struct {
 	LastElementChild       *Element `js:"lastElementChild"`
 	// img, script
 	Src string `js:"src"`
+	// style
+	Style *CSSStyleDeclaration `js:"style"`
 }
 
 func Wrap(el *js.Object) *Element {
@@ -237,7 +280,7 @@ type Event struct {
 	ScreenY   int `js:"screenY"`
 	// 	UIEvent.layerX  Read only
 	LayerX int `js:"layerX"`
-	// Returns the horizontal coordinate of the event relative to the current layer.
+	// Returns the horizontal coordinate of the event relative to the current layer(element).
 	// UIEvent.layerY  Read only
 	LayerY int `js:"layerY"`
 	// Returns the vertical coordinate of the event relative to the current layer.
