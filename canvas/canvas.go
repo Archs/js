@@ -95,7 +95,16 @@ type Context2D struct {
 	// 线条尖角折角的锐利程序，默认为10。
 	MiterLimit int `js:"miterLimit"`
 
-	// A string parsed as CSS font value. The default font is 10px sans-serif.
+	// A string parsed as CSS font value. The default font is '10px sans-serif'.
+	// Syntax:
+	//	    /* size | family */
+	//	    font: 2em "Open Sans", sans-serif;
+	//	    /* style | size | family */
+	//	    font: italic 2em "Open Sans", sans-serif;
+	//	     style | variant | weight | size/line-height | family
+	//	    font: italic small-caps bolder 16px/3 cursive;
+	//	    /* The font used in system dialogs */
+	//	    font: message-box;
 	Font string `js:"font"`
 	// ctx.textAlign = "left" || "right" || "center" || "start" || "end";
 	TextAlign string `js:"textAlign"`
@@ -237,8 +246,8 @@ func (p *Pattern) Value() *js.Object {
 // 			  ctx.fillStyle = pattern;
 // 			  ctx.fillRect(0,0,400,400);
 // 			};
-func (ctx *Context2D) CreatePattern(image interface{}, repetition string) *Pattern {
-	o := ctx.Call("createPattern", image, repetition)
+func (ctx *Context2D) CreatePattern(image *dom.Element, repetition string) *Pattern {
+	o := ctx.Call("createPattern", image.Object, repetition)
 	return &Pattern{o: o}
 }
 
@@ -342,33 +351,33 @@ func (ctx *Context2D) Clip() {
 // 第一组代表控制点（control point）。
 // 所谓的控制点位于曲线的旁边（不是曲线之上），其作用相当于对曲线产生一个拉力。
 // 通过调整控制点的位置，就可以改变曲线的曲率。
-func (ctx *Context2D) QuadraticCurveTo(cpx, cpy, x, y int) {
+func (ctx *Context2D) QuadraticCurveTo(cpx, cpy, x, y interface{}) {
 	ctx.Call("quadraticCurveTo", cpx, cpy, x, y)
 }
 
 // 用于描绘以当前Context绘制起点为起点，(cpx1,cpy1)点和(cpx2, cpy2)点为两个控制点，
 // (x, y)点为终点的贝塞尔曲线路径。
-func (ctx *Context2D) BezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y int) {
+func (ctx *Context2D) BezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y interface{}) {
 	ctx.Call("bezierCurveTo", cp1x, cp1y, cp2x, cp2y, x, y)
 }
 
 // 参数中的两个弧度以0表示0°，位置在3点钟方向；Math.PI值表示180°，位置在9点钟方向。
-func (ctx *Context2D) Arc(x, y, radius int, sAngle, eAngle float32, counterclockwise bool) {
+func (ctx *Context2D) Arc(x, y, radius, sAngle, eAngle interface{}, counterclockwise bool) {
 	ctx.Call("arc", x, y, radius, sAngle, eAngle, counterclockwise)
 }
 
 // 用于描绘一个与两条线段相切的圆弧，两条线段分别以当前Context绘制起点和(x2, y2)点为起点，都以(x1, y1)点为终点，圆弧的半径为radius。
 // 描绘完成后绘制起点会移动到以(x2, y2)为起点的线段与圆弧的切点。
-func (ctx *Context2D) ArcTo(x1, y1, x2, y2, r int) {
+func (ctx *Context2D) ArcTo(x1, y1, x2, y2, r interface{}) {
 	ctx.Call("arcTo", x1, y1, x2, y2, r)
 }
 
-func (ctx *Context2D) IsPointInPath(x, y int) bool {
+func (ctx *Context2D) IsPointInPath(x, y interface{}) bool {
 	return ctx.Call("isPointInPath", x, y).Bool()
 }
 
 // The CanvasRenderingContext2D.isPointInStroke() method of the Canvas 2D API reports whether or not the specified point is inside the area contained by the stroking of a path.
-func (ctx *Context2D) IsPointInStroke(x, y int) bool {
+func (ctx *Context2D) IsPointInStroke(x, y interface{}) bool {
 	return ctx.Call("isPointInStroke", x, y).Bool()
 }
 
