@@ -1,3 +1,8 @@
+// Package clock implements a KnockoutJS component: clock.
+//
+// Use it like this in html files after import this package:
+// 	<clock params="width:300, height:300"></clock>
+// 	<span data-bind="component: {name:'clock',params:{width:200,height:150}}"></span>
 package clock
 
 import (
