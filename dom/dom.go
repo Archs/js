@@ -235,6 +235,12 @@ type Event struct {
 	MovementY int `js:"movementY"`
 	ScreenX   int `js:"screenX"`
 	ScreenY   int `js:"screenY"`
+	// 	UIEvent.layerX  Read only
+	LayerX int `js:"layerX"`
+	// Returns the horizontal coordinate of the event relative to the current layer.
+	// UIEvent.layerY  Read only
+	LayerY int `js:"layerY"`
+	// Returns the vertical coordinate of the event relative to the current layer.
 	// message event
 	Data js.Object `js:"data"`
 }
