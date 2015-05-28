@@ -1,0 +1,6 @@
+compiled/*
+.tmp_partials/*
+resources/
+
+*.exe
+app.js*
