@@ -79,21 +79,21 @@ type Context2D struct {
 	// specifies the level of the blurring effect;
 	// this value doesn't correspond to a number of pixels and is not affected by the current transformation matrix.
 	// The default value is 0.
-	ShadowBlur int `js:"shadowBlur"`
+	ShadowBlur float64 `js:"shadowBlur"`
 	// The CanvasRenderingContext2D.shadowOffsetY property of the Canvas 2D API specifies the distance that the shadow will be offset in vertical distance.
 	// A float specifying the distance that the shadow will be offset in vertical distance. The default value is 0. Negative, Infinity or NaN values are ignored.
-	ShadowOffsetX int `js:"shadowOffsetX"`
+	ShadowOffsetX float64 `js:"shadowOffsetX"`
 	// The CanvasRenderingContext2D.shadowOffsetX property of the Canvas 2D API specifies the distance that the shadow will be offset in horizontal distance.
-	ShadowOffsetY int `js:"shadowOffsetY"`
+	ShadowOffsetY float64 `js:"shadowOffsetY"`
 
 	// 线条的端点样式，有butt（无）、round（圆头）、square（方头）三种类型可供选择，默认为butt。
 	LineCap string `js:"lineCap"`
 	// 线条的转折处样式，有round（圆角）、bevel（平角）、miter（尖角）三种；类型可供选择，默认为miter。
 	LineJoin string `js:"lineJoin"`
 	// 线条的宽度，单位是像素（px），默认为1.0。
-	LineWidth int `js:"lineWidth"`
+	LineWidth float64 `js:"lineWidth"`
 	// 线条尖角折角的锐利程序，默认为10。
-	MiterLimit int `js:"miterLimit"`
+	MiterLimit float64 `js:"miterLimit"`
 
 	// A string parsed as CSS font value. The default font is '10px sans-serif'.
 	// Syntax:
