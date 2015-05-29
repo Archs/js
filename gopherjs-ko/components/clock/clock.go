@@ -17,29 +17,54 @@ import (
 
 type simClock struct {
 	*canvas.Context2D
-	w int
-	h int
-	r int // radius
+	w float64
+	h float64
+	r float64 // radius
+	// for needle length
+	hourNeedleRatio   float64
+	minuteNeedleRatio float64
+	secondNeedleRatio float64
+	// for mark length
+	borderRatio float64
+	markRatio   float64
+}
+
+func newSimClock(ctx *canvas.Context2D, w, h int) *simClock {
+	s := new(simClock)
+	s.Context2D = ctx
+	s.w = float64(w)
+	s.h = float64(h)
+	if s.w > s.h {
+		s.r = s.h / 2
+	} else {
+		s.r = s.w / 2
+	}
+	s.hourNeedleRatio = 0.5
+	s.minuteNeedleRatio = 0.7
+	s.secondNeedleRatio = 0.8
+	s.borderRatio = 0.05
+	s.markRatio = 0.05
+	return s
 }
 
 func (s *simClock) drawPane() {
 	s.Save()
 	// outer
 	s.StrokeStyle = "black"
-	s.LineWidth = 10
+	s.LineWidth = s.r * s.borderRatio
 	s.BeginPath()
 	s.Arc(0, 0, s.r-10, 0, 2*math.Pi, false)
 	s.Stroke()
 	// hour marks
-	s.LineWidth = 6
+	s.LineWidth = s.r * s.markRatio
 	iv := math.Pi / 6
 	s.Save()
 	for i := 1; i <= 12; i++ {
-		// s.Rotate(iv)
 		s.BeginPath()
-		r1 := float64(s.r - 25)
-		r2 := float64(s.r - 10)
-		r3 := float64(s.r - 40)
+		r1 := s.r * (1 - 2*s.markRatio - s.borderRatio)
+		r2 := s.r * (1 - s.borderRatio)
+		// r3 := float64(s.r - 40)
+		r3 := s.r * (1 - 4*s.markRatio - s.borderRatio)
 		angle := iv*float64(i) - math.Pi/2
 		x1 := r1 * math.Cos(angle)
 		y1 := r1 * math.Sin(angle)
@@ -56,18 +81,20 @@ func (s *simClock) drawPane() {
 		s.TextAlign = "center"
 		s.TextBaseline = "middle"
 		// s.FillStyle = "#FFF"
-		s.FillText(fmt.Sprintf("%d", i), x3, y3, 20)
+		if s.r > 90 {
+			s.FillText(fmt.Sprintf("%d", i), x3, y3, 20)
+		}
 		s.Restore()
 	}
 	s.Restore()
 	// minutes marks
 	iv = math.Pi / 30
-	s.LineWidth = 3
+	s.LineWidth = s.r * s.markRatio * 0.5
 	for i := 0; i < 60; i++ {
 		s.Rotate(iv)
 		s.BeginPath()
-		s.MoveTo(s.r-20, 0)
-		s.LineTo(s.r-10, 0)
+		s.MoveTo(s.r*(1-2.5*s.markRatio), 0)
+		s.LineTo(s.r*(1-s.borderRatio), 0)
 		s.Stroke()
 	}
 	// end
@@ -94,7 +121,7 @@ func (s *simClock) drawCZ() {
 
 func (s *simClock) drawNeedle(t time.Time) {
 	s.Save()
-	needle := func(angle float64, lineWidth int, ratio float64, color string) {
+	needle := func(angle float64, lineWidth float64, ratio float64, color string) {
 		s.BeginPath()
 		s.StrokeStyle = color
 		s.LineWidth = lineWidth
@@ -108,13 +135,13 @@ func (s *simClock) drawNeedle(t time.Time) {
 	}
 	// houre
 	angleHour := float64(t.Hour()) / 6.0 * math.Pi
-	needle(angleHour, 5, 0.5, "black")
+	needle(angleHour, 5.0, s.hourNeedleRatio, "black")
 	// minute
 	angleMinute := float64(t.Minute()) / 30.0 * math.Pi
-	needle(angleMinute, 3, 0.7, "black")
+	needle(angleMinute, 3.0, s.minuteNeedleRatio, "black")
 	// second
 	angleSecond := (float64(t.Second()) + float64(t.Nanosecond())/1000000000.0) / 30.0 * math.Pi
-	needle(angleSecond, 1, 0.8, "red")
+	needle(angleSecond, 1.0, s.secondNeedleRatio, "red")
 	// end
 	s.Restore()
 }
@@ -122,11 +149,13 @@ func (s *simClock) drawNeedle(t time.Time) {
 func (s *simClock) drawDay(t time.Time) {
 	day := t.Day()
 	r := float64(s.r) * 0.45
-	s.FillStyle = "black"
-	s.FillRect(r, -11, 25, 20)
-	s.FillStyle = "white"
-	s.Font = "20px serif"
-	s.FillText(fmt.Sprintf("%d", day), r+3, 6, 30)
+	if r > 30 {
+		s.FillStyle = "black"
+		s.FillRect(r, -11, 25, 20)
+		s.FillStyle = "white"
+		s.Font = "20px serif"
+		s.FillText(fmt.Sprintf("%d", day), r+3, 6, 30)
+	}
 }
 
 func (s *simClock) draw(t time.Time) {
@@ -135,22 +164,19 @@ func (s *simClock) draw(t time.Time) {
 	s.Translate(s.w/2, s.h/2)
 	s.StrokeStyle = "black"
 	s.LineWidth = 2
-	if s.w > s.h {
-		s.r = s.h / 2
-	} else {
-		s.r = s.w / 2
-	}
 	// s.drawCZ()
 	s.drawPane()
 	s.drawNeedle(t)
 	s.drawDay(t)
 	s.Restore()
 
-	s.Save()
-	s.Translate(s.w/2, s.h/2)
-	s.Font = "20px serif"
-	s.FillText(t.Format("15:04:05"), -35, 50, 100)
-	s.Restore()
+	if s.r > 90 {
+		s.Save()
+		s.Translate(s.w/2, s.h/2)
+		s.Font = "20px serif"
+		s.FillText(t.Format("15:04:05"), -s.r*0.25, s.r*0.5, 100)
+		s.Restore()
+	}
 }
 
 func registerClock() {
@@ -173,16 +199,7 @@ func registerClock() {
 				} else {
 					c.Height = c.Width
 				}
-				if c.Width < 120 {
-					el.InnerHTML = "WARNING! clock width/heigth too small"
-					println("WARNING! clock width/heigth too small")
-					return
-				}
-				clock := &simClock{
-					Context2D: c.GetContext2D(),
-					w:         c.Width,
-					h:         c.Height,
-				}
+				clock := newSimClock(c.GetContext2D(), c.Width, c.Height)
 				clock.draw(time.Now())
 				go func() {
 					for t := range time.Tick(time.Millisecond * 100) {
