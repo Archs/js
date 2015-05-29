@@ -121,11 +121,12 @@ func (s *simClock) drawNeedle(t time.Time) {
 
 func (s *simClock) drawDay(t time.Time) {
 	day := t.Day()
-	r := float64(s.r) * 0.6
+	r := float64(s.r) * 0.45
 	s.FillStyle = "black"
-	s.FillRect(r, -2, 5, 4)
+	s.FillRect(r, -11, 25, 20)
 	s.FillStyle = "white"
-	s.FillText(fmt.Sprintf("%d", day), r, -2, 10)
+	s.Font = "20px serif"
+	s.FillText(fmt.Sprintf("%d", day), r+3, 6, 30)
 }
 
 func (s *simClock) draw(t time.Time) {
