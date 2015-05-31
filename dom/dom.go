@@ -163,6 +163,9 @@ type Element struct {
 	// width & height
 	Width  int `js:"width"`
 	Height int `js:"height"`
+	// window size
+	InnerWidth  int `js:"innerWidth"`
+	InnerHeight int `js:"innerHeight"`
 	// dom
 	PreviousElementSibling *Element `js:"previousElementSibling"`
 	NextElementSibling     *Element `js:"nextElementSibling"`
