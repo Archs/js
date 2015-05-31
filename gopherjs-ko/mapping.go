@@ -14,7 +14,7 @@ type Mapper struct {
 	*js.Object
 	data    interface{}
 	options *js.Object
-	target  *js.Object
+	target  interface{}
 }
 
 func Mapping() *Mapper {
@@ -44,8 +44,9 @@ func (m *Mapper) FromJS(data interface{}) (vm *ViewModel) {
 	return
 }
 
-// Specifying the update target
-func (m *Mapper) Target(obj *js.Object) *Mapper {
+// Specifying the target to update, can be a *ViewModel or a *js.Object
+// or a struct with *js.Object embeded which is a ViewModel then
+func (m *Mapper) Target(obj interface{}) *Mapper {
 	m.target = obj
 	return m
 }
@@ -61,8 +62,8 @@ func (m *Mapper) FromJSON(data string) (vm *ViewModel) {
 	return
 }
 
-func (m *Mapper) ToJSON(vm interface{}) string {
-	return m.Object.Call("toJSON", vm).String()
+func (m *Mapper) ToJSON(vm *ViewModel) string {
+	return m.Object.Call("toJSON", vm.Object).String()
 }
 
 // Set mapping options
