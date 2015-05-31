@@ -3,7 +3,11 @@
 // Using EnableSecureBinding make KnockoutJS works under CSP environments.
 package ko
 
-import "github.com/gopherjs/gopherjs/js"
+import (
+	"github.com/Archs/js/dom"
+
+	"github.com/gopherjs/gopherjs/js"
+)
 
 type Disposer func()
 
@@ -153,6 +157,25 @@ func Components() *ComponentsFuncs {
 
 func (co *ComponentsFuncs) Register(name string, params js.M) {
 	co.o.Call("register", name, params)
+}
+
+// RegisterEx is an easy form to create KnockoutJS components
+//  name is the component name
+//  vmfunc is the ViewModel creator
+//  template is the html tempalte for the component
+//  cssRules would be directly embeded in the final html page, which can be ""
+func (co *ComponentsFuncs) RegisterEx(name string, vmfunc func(params *js.Object) interface{}, template, cssRules string) {
+	// embed the cssRules
+	if cssRules != "" {
+		style := dom.CreateElement("style")
+		style.InnerHTML = cssRules
+		dom.Body().AppendChild(style)
+	}
+	// register the component
+	co.Register(name, js.M{
+		"viewModel": vmfunc,
+		"template":  template,
+	})
 }
 
 func ko() *js.Object {
