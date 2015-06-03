@@ -177,6 +177,10 @@ type Element struct {
 	Style     *CSSStyleDeclaration `js:"style"`
 	ClassName string               `js:"className"`
 	ClassList []string             `js:"classList"`
+
+	// funcs
+	SetAttribute func(attr string, val interface{}) `js:"setAttribute"`
+	GetAttribute func(attr string) *js.Object       `js:"getAttribute"`
 }
 
 func Wrap(el *js.Object) *Element {
@@ -229,13 +233,13 @@ func (e *Element) RemoveChild(child *Element) {
 	e.Call("removeChild", child.Object)
 }
 
-func (e *Element) SetAttribute(attr string, val interface{}) {
-	e.Call("setAttribute", attr, val)
-}
+// func (e *Element) SetAttribute(attr string, val interface{}) {
+// 	e.Call("setAttribute", attr, val)
+// }
 
-func (e *Element) GetAttribute(attr string) *js.Object {
-	return e.Call("getAttribute", attr)
-}
+// func (e *Element) GetAttribute(attr string) *js.Object {
+// 	return e.Call("getAttribute", attr)
+// }
 
 func (e *Element) RemoveAttribute(attr string) {
 	e.Call("removeAttribute", attr)
