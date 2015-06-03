@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Archs/js/dom"
 	"github.com/gopherjs/gopherjs/js"
 )
 
@@ -18,5 +19,10 @@ func main() {
 		},
 	}
 	println(a.Method) // this is fine
-	a.Method()        // this cause panic
+	// a.Method()        // this cause panic
+	dom.OnDOMContentLoaded(func() {
+		body := dom.Body()
+		body.SetAttribute("aaa", 123)
+		println(body.GetAttribute("aaa"))
+	})
 }
