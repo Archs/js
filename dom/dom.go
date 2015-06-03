@@ -181,6 +181,16 @@ type Element struct {
 	// funcs
 	SetAttribute func(attr string, val interface{}) `js:"setAttribute"`
 	GetAttribute func(attr string) *js.Object       `js:"getAttribute"`
+	// func (e *Element) GetElementById(id string) *Element {
+	// 	obj := e.Call("getElementById", id)
+	// 	return Wrap(obj)
+	// }
+	GetElementById func(id string) *js.Object `js:"getElementById"`
+
+	// func (e *Element) AppendChild(child *Element) {
+	// 	e.Call("appendChild", child.Object)
+	// }
+	AppendChild func(child *Element) `js:"appendChild"`
 }
 
 func Wrap(el *js.Object) *Element {
@@ -208,22 +218,22 @@ func CreateElement(tagName string) *Element {
 	return Wrap(obj)
 }
 
-func GetElementById(id string) *Element {
-	return Document().GetElementById(id)
-}
+// func GetElementById(id string) *Element {
+// 	return Document().GetElementById(id)
+// }
 
 func Alert(msg string) {
 	js.Global.Call("alert", msg)
 }
 
-func (e *Element) GetElementById(id string) *Element {
-	obj := e.Call("getElementById", id)
-	return Wrap(obj)
-}
+// func (e *Element) GetElementById(id string) *Element {
+// 	obj := e.Call("getElementById", id)
+// 	return Wrap(obj)
+// }
 
-func (e *Element) AppendChild(child *Element) {
-	e.Call("appendChild", child.Object)
-}
+// func (e *Element) AppendChild(child *Element) {
+// 	e.Call("appendChild", child.Object)
+// }
 
 func (e *Element) Remove() {
 	e.Call("remove")

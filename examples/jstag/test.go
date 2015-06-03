@@ -22,7 +22,13 @@ func main() {
 	// a.Method()        // this cause panic
 	dom.OnDOMContentLoaded(func() {
 		body := dom.Body()
+		div := dom.CreateElement("div")
+		div.SetAttribute("id", "div")
+		div.SetAttribute("class", "div")
+		body.AppendChild(div)
 		body.SetAttribute("aaa", 123)
 		println(body.GetAttribute("aaa"))
+		el := body.GetElementById("div")
+		println(el)
 	})
 }
