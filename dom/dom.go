@@ -142,6 +142,12 @@ func (css *CSSStyleDeclaration) ToMap() map[string]string {
 	return m
 }
 
+func GetComputedStyle(e *Element) *CSSStyleDeclaration {
+	return &CSSStyleDeclaration{
+		Object: js.Global.Get("document").Get("defaultView").Call("getComputedStyle", e.Object),
+	}
+}
+
 type Element struct {
 	*js.Object
 	// basic attr
