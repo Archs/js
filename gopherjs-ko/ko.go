@@ -27,6 +27,14 @@ type WritableComputed struct {
 	*Computed
 }
 
+type Subscription struct {
+	*js.Object
+}
+
+func (s *Subscription) Dispose() {
+	s.Object.Call("dispose")
+}
+
 func (ob *Observable) Set(data interface{}) {
 	ob.o.Invoke(data)
 }
@@ -35,10 +43,10 @@ func (ob *Observable) Get() *js.Object {
 	return ob.o.Invoke()
 }
 
-func (ob *Observable) Subscribe(fn func(*js.Object)) Disposer {
+func (ob *Observable) Subscribe(fn func(*js.Object)) *Subscription {
 	o := ob.o.Call("subscribe", fn)
-	return func() {
-		o.Invoke()
+	return &Subscription{
+		Object: o,
 	}
 }
 
