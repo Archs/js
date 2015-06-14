@@ -12,8 +12,6 @@ type ViewModel struct {
 	MaxValue *ko.Computed        `js:"maxValue"`
 }
 
-// ...
-
 func New() *ViewModel {
 	self := new(ViewModel)
 	self.Object = js.Global.Get("Object").New()
@@ -33,6 +31,5 @@ func main() {
 	for i := 0; i < 100; i++ {
 		vm.Values.Push(i)
 	}
-	// ko.ApplyBindings(vm)
 	println(vm.MaxValue.Get().Float())
 }
