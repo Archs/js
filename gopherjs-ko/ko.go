@@ -167,22 +167,44 @@ func (co *ComponentsFuncs) Register(name string, params js.M) {
 	co.o.Call("register", name, params)
 }
 
+// - 'params' is an object whose key/value pairs are the parameters
+//   passed from the component binding or custom element
+// - 'componentInfo.element' is the element the component is being
+//   injected into. When createViewModel is called, the template has
+//   already been injected into this element, but isn't yet bound.
+// - 'componentInfo.templateNodes' is an array containing any DOM
+//   nodes that have been supplied to the component. See below.
+type ComponentInfo struct {
+	*js.Object
+	Element *dom.Element `js:"element"`
+}
+
 // RegisterEx is an easy form to create KnockoutJS components
 //  name is the component name
-//  vmfunc is the ViewModel creator
+//  vmCreator is the ViewModel creator with type: func(paramsMap *js.Object, info *ComponentInfo) (vm interface{})
+// 	   vmCreator can be nil which means template only component
 //  template is the html tempalte for the component
 //  cssRules would be directly embeded in the final html page, which can be ""
-func (co *ComponentsFuncs) RegisterEx(name string, vmfunc func(params *js.Object) interface{}, template, cssRules string) {
+func (co *ComponentsFuncs) RegisterEx(name string, vmCreator func(params *js.Object, info *ComponentInfo) interface{}, template, cssRules string) {
 	// embed the cssRules
 	if cssRules != "" {
 		style := dom.CreateElement("style")
 		style.InnerHTML = cssRules
 		dom.Body().AppendChild(style)
 	}
+	// template only component
+	if vmCreator == nil {
+		co.Register(name, js.M{
+			"template": template,
+		})
+		return
+	}
 	// register the component
 	co.Register(name, js.M{
-		"viewModel": vmfunc,
-		"template":  template,
+		"viewModel": js.M{
+			"createViewModel": vmCreator,
+		},
+		"template": template,
 	})
 }
 

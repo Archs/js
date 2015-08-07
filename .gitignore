@@ -4,3 +4,6 @@ resources/
 
 *.exe
 app.js*
+*.js.map
+*.js
+*.db
