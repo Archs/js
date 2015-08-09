@@ -123,7 +123,7 @@ type Context2D struct {
 // New creates a Canvas instance
 // el is the html element
 func New(el *js.Object) *Canvas {
-	return &Canvas{dom.Wrap(el)}
+	return &Canvas{dom.WrapElement(el)}
 }
 
 func (c *Canvas) GetContext2D() *Context2D {

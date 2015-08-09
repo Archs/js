@@ -7,10 +7,11 @@ import (
 )
 
 func main() {
+	println(`ko.Get("utils"):`, ko.Get("utils"))
 	uploader.SetCallback(func(url string, files []*dom.File) {
 		for _, file := range files {
 			println("upload", file.Name, "to", url, "done")
 		}
 	})
-	ko.ApplyBindings(10)
+	ko.ApplyBindings(nil)
 }

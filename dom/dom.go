@@ -148,8 +148,160 @@ func GetComputedStyle(e *Element) *CSSStyleDeclaration {
 	}
 }
 
-type Element struct {
+type EventTarget struct {
 	*js.Object
+	// Event handling
+
+	// Registers an event handler to a specific event type on the element.
+	//   If true, useCapture indicates that the user wishes to initiate capture.
+	//   After initiating capture, all events of the specified type will be dispatched to the registered listener before being dispatched to any EventTarget beneath it in the DOM tree.
+	//   Events which are bubbling upward through the tree will not trigger a listener designated to use capture.
+	AddEventListener    func(eventType string, listener func(*Event), useCapture ...bool) `js:"addEventListener"`
+	RemoveEventListener func(eventType string, listener func(*Event), useCapture ...bool) `js:"removeEventListener"`
+	DispatchEvent       func(*Event)                                                      `js:"dispatchEvent"`
+}
+
+func WrapEventTarget(t *js.Object) *EventTarget {
+	return &EventTarget{Object: t}
+}
+
+type Win struct {
+	*EventTarget
+}
+
+func WrapWindow(o *js.Object) *Win {
+	return &Win{
+		EventTarget: WrapEventTarget(o),
+	}
+}
+
+type NodeType int
+
+const (
+	ELEMENT_NODE                NodeType = 1
+	ATTRIBUTE_NODE                       = 2
+	TEXT_NODE                            = 3
+	CDATA_SECTION_NODE                   = 4
+	ENTITY_REFERENCE_NODE                = 5
+	ENTITY_NODE                          = 6
+	PROCESSING_INSTRUCTION_NODE          = 7
+	COMMENT_NODE                         = 8
+	DOCUMENT_NODE                        = 9
+	DOCUMENT_TYPE_NODE                   = 10
+	DOCUMENT_FRAGMENT_NODE               = 11
+	NOTATION_NODE                        = 12
+)
+
+type NodeList struct {
+	*js.Object
+	Length int                `js:"length"`
+	Item   func(idx int) Node `js:"item"`
+}
+
+type Node struct {
+	*EventTarget
+	// attrs
+	BaseURI         string    `js:"baseURI"`         //	返回节点的绝对基准 URI。	No	1	No	Yes
+	ChildNodes      *NodeList `js:"childNodes"`      //	返回节点到子节点的节点列表。	5	1	9	Yes
+	FirstChild      *Node     `js:"firstChild"`      //	返回节点的首个子节点。	5	1	9	Yes
+	LastChild       *Node     `js:"lastChild"`       //	返回节点的最后一个子节点。	5	1	9	Yes
+	LocalName       string    `js:"localName"`       //	返回节点的本地名称。	No	1	9	Yes
+	NamespaceURI    string    `js:"namespaceURI"`    //	返回节点的命名空间 URI。	No	1	9	Yes
+	NextSibling     *Node     `js:"nextSibling"`     //	返回节点之后紧跟的同级节点。	5	1	9	Yes
+	NodeName        string    `js:"nodeName"`        //	返回节点的名称，根据其类型。	5	1	9	Yes
+	NodeType        NodeType  `js:"nodeType"`        //	返回节点的类型。	5	1	9	Yes
+	NodeValue       string    `js:"nodeValue"`       //	设置或返回节点的值，根据其类型。	5	1	9	Yes
+	OwnerDocument   *Doc      `js:"ownerDocument"`   //	返回节点的根元素（document 对象）。	5	1	9	Yes
+	ParentNode      *Node     `js:"parentNode"`      //	返回节点的父节点。	5	1	9	Yes
+	Prefix          string    `js:"prefix"`          //	设置或返回节点的命名空间前缀。	No	1	9	Yes
+	PreviousSibling *Node     `js:"previousSibling"` //	返回节点之前紧跟的同级节点。	5	1	9	Yes
+	TextContent     string    `js:"textContent"`     //	设置或返回节点及其后代的文本内容。	No	1	No	Yes
+	// Text            string    `js:"text"`            //	返回节点及其后代的文本（IE 独有的属性）。	5	No	No	No
+	// Xml             string    `js:"xml"`             //	返回节点及其后代的 XML（IE 独有的属性）。	5	No	No	No
+
+	// methods
+	AppendChild             func(*Node)     `js:"appendChild"`             //	向节点的子节点列表的结尾添加新的子节点。	5	1	9	Yes
+	CloneNode               func() *Node    `js:"cloneNode"`               //	复制节点。	5	1	9	Yes
+	CompareDocumentPosition func(*Node) int `js:"compareDocumentPosition"` //	对比两个节点的文档位置。	No	1	No	Yes
+	// GetFeature              func()       `js:"getFeature"`              //eature,version)	返回一个 DOM 对象，此对象可执行带有指定特性和版本的专门的 API。	 	 	No	Yes
+	// GetUserData           func() `js:"getUserData"`           //ey)	返回与此节点上的某个键相关联的对象。此对象必须首先通过使用相同的键来调用 setUserData 被设置到此节点。	 	 	No	Yes
+	// HasAttributes         func() `js:"hasAttributes"`         //	判断当前节点是否拥有属性。	No	1	9	Yes
+	HasChildNodes      func() bool                     `js:"hasChildNodes"`      //	判断当前节点是否拥有子节点。	5	1	9	Yes
+	InsertBefore       func(which *Node, before *Node) `js:"insertBefore"`       //	在指定的子节点前插入新的子节点。	5	1	9	Yes
+	IsDefaultNamespace func(string) bool               `js:"isDefaultNamespace"` //RI)	返回指定的命名空间 URI 是否为默认。	 	 	No	Yes
+	IsEqualNode        func(*Node) bool                `js:"isEqualNode"`        //	检查两个节点是否相等。	No	No	No	Yes
+	IsSameNode         func(*Node) bool                `js:"isSameNode"`         //	检查两个节点是否是相同的节点。	No	1	No	Yes
+	// IsSupported           func()                          `js:"isSupported"`           //	返回当前节点是否支持某个特性。	 	 	9	Yes
+	LookupNamespaceURI func(string) string            `js:"lookupNamespaceURI"` //	返回匹配指定前缀的命名空间 URI。	No	1	No	Yes
+	LookupPrefix       func() string                  `js:"lookupPrefix"`       //	返回匹配指定命名空间 URI 的前缀。	No	1	No	Yes
+	Normalize          func()                         `js:"normalize"`          //	合并相邻的Text节点并删除空的Text节点。	5	1	9	Yes
+	RemoveChild        func(*Node)                    `js:"removeChild"`        //	删除（并返回）当前节点的指定子节点。	5	1	9	Yes
+	ReplaceChild       func(newChild, oldChild *Node) `js:"replaceChild"`       //	用新节点替换一个子节点。	5	1	9	Yes
+	// SelectNodes           func()                         `js:"selectNodes"`           //	用一个 XPath 表达式查询选择节点。	6
+	// SelectSingleNode      func() `js:"selectSingleNode"`      //	查找和 XPath 查询匹配的一个节点。	6
+	// TransformNode         func() `js:"transformNode"`         //	使用 XSLT 把一个节点转换为一个字符串。	6
+	// TransformNodeToObject func() `js:"transformNodeToObject"` //	使用 XSLT 把一个节点转换为一个文档。	6
+	// SetUserData           func() `js:"setUserData"`           //ey,data,handler)	把对象关联到节点上的一个键上。	 	 	No	Yes
+}
+
+func WrapNode(n *js.Object) *Node {
+	return &Node{
+		EventTarget: WrapEventTarget(n),
+	}
+}
+
+type Doc struct {
+	*Node
+	CharacterSet    string     `js:"characterSet"`
+	Async           bool       `js:"async"`           //	规定 XML 文件的下载是否应当被同步处理。	5	1.5	9	No
+	Doctype         *js.Object `js:"doctype"`         //	返回与文档相关的文档类型声明 (DTD)。	6	1	9	Yes
+	DocumentElement *Element   `js:"documentElement"` //	返回文档的根节点	5	1	9	Yes
+	DocumentURI     string     `js:"documentURI"`     //	设置或返回文档的位置	No	1	9	Yes
+	// DomConfig           string     `js:"domConfig"`           //	返回normalizeDocument()被调用时所使用的配置	 	 	No	Yes
+	Implementation *js.Object `js:"implementation"` //	返回处理该文档的 DOMImplementation 对象。	No	1	9	Yes
+	// InputEncoding       string `js:"inputEncoding"`       //	返回用于文档的编码方式（在解析时）。	No	1	No	Yes
+	// StrictErrorChecking string `js:"strictErrorChecking"` //	设置或返回是否强制进行错误检查。	No	1	No	Yes
+	// Text          string `js:"text"`          //	返回节点及其后代的文本（仅用于 IE）。	5	No	No	No
+	// Xml           string `js:"xml"`           //	返回节点及其后代的 XML（仅用于 IE）。	5	No	No	No
+	// XmlEncoding   string `js:"xmlEncoding"`   //	返回文档的编码方法。	No	1	No	Yes
+	// XmlStandalone string `js:"xmlStandalone"` //	设置或返回文档是否为 standalone。	No	1	No	Yes
+	// XmlVersion    string `js:"xmlVersion"`    //	设置或返回文档的 XML 版本。	No	1	No	Yes
+
+	// methods
+	AdoptNode func(*Node) *Node `js:"adoptNode"` // (sourcenode)	从另一个文档向本文档选定一个节点，然后返回被选节点。	 	 	No	Yes
+	// CreateAttribute             func()            `js:"createAttribute"`             // (name)	创建拥有指定名称的属性节点，并返回新的 Attr 对象。	6	1	9	Yes
+	// CreateAttributeNS           func()            `js:"createAttributeNS"`           // (uri,name)	创建拥有指定名称和命名空间的属性节点，并返回新的 Attr 对象。	 	 	9	Yes
+	// CreateCDATASection          func()            `js:"createCDATASection"`          // ()	创建 CDATA 区段节点。	5	1	9	Yes
+	CreateComment func(string) *Node `js:"createComment"` // ()	创建注释节点。	6	1	9	Yes
+	// CreateDocumentFragment      func()             `js:"createDocumentFragment"`      // ()	创建空的 DocumentFragment 对象，并返回此对象。	5	1	9	Yes
+	CreateElement   func(tagName string) *Element         `js:"createElement"`   // ()	创建元素节点。	5	1	9	Yes
+	CreateElementNS func(namespace, name string) *Element `js:"createElementNS"` // ()	创建带有指定命名空间的元素节点。	No	1	9	Yes
+	CreateEvent     func(etype string) *Event             `js:"createEvent"`     // ()	创建新的 Event 对象。	 	 	 	Yes
+	// CreateEntityReference       func()                                `js:"createEntityReference"`       // (name)	创建 EntityReference 对象，并返回此对象。	5	 	No	Yes
+	// CreateExpression            func()                                `js:"createExpression"`            // ()	创建一个XPath表达式以供稍后计算。	 	 	 	Yes
+	// CreateProcessingInstruction func()                                `js:"createProcessingInstruction"` // ()	创建 ProcessingInstruction 对象，并返回此对象。	5	 	9	Yes
+	// CreateRange                 func()                                `js:"createRange"`                 // ()	创建 Range 对象，并返回此对象。	No	 	 	Yes
+	// Evaluate               func() `js:"evaluate"`               // ()	计算一个 XPath 表达式。	No	1	9	Yes
+	CreateTextNode         func(text string) *Node              `js:"createTextNode"`         // ()	创建文本节点。	5	1	9	Yes
+	GetElementById         func(id string) *Element             `js:"getElementById"`         // ()	查找具有指定的唯一 ID 的元素。	5	1	9	Yes
+	GetElementsByTagName   func(tag string) *HTMLCollection     `js:"getElementsByTagName"`   // ()	返回所有具有指定名称的元素节点。	5	1	9	Yes
+	GetElementsByTagNameNS func(ns, tag string) *HTMLCollection `js:"getElementsByTagNameNS"` // ()	返回所有具有指定名称和命名空间的元素节点。	No	1	9	Yes
+	ImportNode             func(node *Node, deep bool) *Node    `js:"importNode"`             // ()	把一个节点从另一个文档复制到该文档以便应用。	 	 	9	Yes
+	// LoadXML                func()                               `js:"loadXML"`                // ()	通过解析XML标签字符串来组成文档。
+	// NormalizeDocument      func()                               `js:"normalizeDocument"`      // ()	 	 	 	No	Yes
+	// RenameNode             func()                               `js:"renameNode"`             // ()	重命名元素或者属性节点。	 	 	No	Yes
+	QuerySelector    func(sel string) *Element        `js:"querySelector"`
+	QuerySelectorAll func(sel string) *HTMLCollection `js:"querySelectorAll"`
+}
+
+func WrapDocument(o *js.Object) *Doc {
+	return &Doc{
+		Node: WrapNode(o),
+	}
+}
+
+type Element struct {
+	*Node
 	// basic attr
 	Id              string `js:"id"`
 	InnerHTML       string `js:"innerHTML"`
@@ -184,20 +336,10 @@ type Element struct {
 	RemoveChild func(child *Element) `js:"removeChild"`
 	Remove      func()               `js:"remove"`
 
-	GetElementsByTagName func(tagName string) *HTMLCollection `js:"getElementsByTagName"`
-	QuerySelector        func(sel string) *Element            `js:"querySelector"`
-	QuerySelectorAll     func(sel string) *HTMLCollection     `js:"querySelectorAll"`
+	QuerySelector    func(sel string) *Element        `js:"querySelector"`
+	QuerySelectorAll func(sel string) *HTMLCollection `js:"querySelectorAll"`
 
-	// Event handling
-
-	// Registers an event handler to a specific event type on the element.
-	//   If true, useCapture indicates that the user wishes to initiate capture.
-	//   After initiating capture, all events of the specified type will be dispatched to the registered listener before being dispatched to any EventTarget beneath it in the DOM tree.
-	//   Events which are bubbling upward through the tree will not trigger a listener designated to use capture.
-	AddEventListener    func(eventType string, listener func(*Event), useCapture ...bool) `js:"addEventListener"`
-	RemoveEventListener func(eventType string, listener func(*Event), useCapture ...bool) `js:"removeEventListener"`
-	DispatchEvent       func(*Event)                                                      `js:"dispatchEvent"`
-	Click               func()                                                            `js:"click"`
+	Click func() `js:"click"`
 }
 
 // func (e *Element) Style() *CSSStyleDeclaration {
@@ -216,33 +358,19 @@ type HTMLCollection struct {
 	Item func(index int) *Element `js:"item"`
 }
 
-func Wrap(el *js.Object) *Element {
+func WrapElement(el *js.Object) *Element {
 	if el == js.Undefined || el == nil {
 		return nil
 	}
-	return &Element{Object: el}
+	return &Element{Node: WrapNode(el)}
 }
 
-func Window() *Element {
-	return Wrap(js.Global)
-}
-
-func Document() *Element {
-	return Wrap(js.Global.Get("document"))
+func Document() *Doc {
+	return WrapDocument(js.Global.Get("document"))
 }
 
 func Body() *Element {
-	return Wrap(Document().Get("body"))
-}
-
-// Create an element instance
-func CreateElement(tagName string) *Element {
-	obj := Document().Call("createElement", tagName)
-	return Wrap(obj)
-}
-
-func GetElementById(id string) *Element {
-	return Wrap(Document().Call("getElementById", id))
+	return WrapElement(Document().Get("body"))
 }
 
 func Alert(msg string) {
@@ -390,6 +518,10 @@ func NewEvent(evt_type string) *Event {
 // 	}
 // 	e.Call("removeEventListener", typ, listener, capture)
 // }
+
+func Window() *Win {
+	return WrapWindow(js.Global.Get("window"))
+}
 
 func OnLoad(callback func()) {
 	Window().AddEventListener(EvtLoad, func(*Event) {

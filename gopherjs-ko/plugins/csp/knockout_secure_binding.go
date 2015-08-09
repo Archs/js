@@ -1,4 +1,10 @@
-package ko
+// Knockout Secure Binding (KSB) is a binding provider for Knockout
+// that can be used with a Content Security Policy (CSP)
+// that disables eval and new Function.
+//
+// Must load knockout-secure-binding.min.js first:
+// https://github.com/brianmhunt/knockout-secure-binding
+package csp
 
 import (
 	"github.com/gopherjs/gopherjs/js"
@@ -11,15 +17,8 @@ import (
 //    noVirtualElements: false       // default true
 // };
 // ko.bindingProvider.instance = new ko.secureBindingsProvider(options);
-//
-// Knockout Secure Binding (KSB) is a binding provider for Knockout
-// that can be used with a Content Security Policy (CSP)
-// that disables eval and new Function.
-//
+
 // Use this function to make gopherjs-ko works under chrome app/extensions.
-//
-// Must load knockout-secure-binding.min.js first:
-// https://github.com/brianmhunt/knockout-secure-binding
 func EnableSecureBinding() {
 	ko := js.Global.Get("ko")
 	secureBindingsProvider := ko.Get("secureBindingsProvider")

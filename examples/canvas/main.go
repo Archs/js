@@ -7,12 +7,12 @@ import (
 )
 
 func test() {
-	span := dom.CreateElement("span")
+	span := dom.Document().CreateElement("span")
 	dom.Body().AppendChild(span)
-	el := dom.GetElementById("canvas")
+	el := dom.Document().GetElementById("canvas")
 	c := canvas.New(el.Object)
 	ctx := c.GetContext2D()
-	img := dom.CreateElement("img")
+	img := dom.Document().CreateElement("img")
 	img.Src = "img/bull.png"
 	img.AddEventListener(dom.EvtLoad, func(e *dom.Event) {
 		// p := ctx.CreatePattern(img, canvas.PatternNoRepeat)
@@ -26,7 +26,7 @@ func test() {
 		println(img, 0, 0, img.Width, img.Height)
 		el.Width = img.Width
 		el.Height = img.Height
-		ctx.DrawImage(img, 0, 0, img.Width, img.Height)
+		ctx.DrawImage(img, 0, 0, float64(img.Width), float64(img.Height))
 	})
 	el.AddEventListener(dom.EvtMousemove, func(e *dom.Event) {
 		println("mouse:", e.LayerX, e.LayerY)

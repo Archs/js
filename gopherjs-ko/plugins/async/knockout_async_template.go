@@ -1,4 +1,6 @@
-package ko
+// Package async provide async template loading ablity to KnockoutJS
+// It depends on knockout-async-template.js(knockout-async-template.js) and jQuery
+package async
 
 import (
 	"github.com/gopherjs/gopherjs/js"
@@ -8,11 +10,9 @@ type AsynchronousTemplateConfig struct {
 	*js.Object
 }
 
-// Must load knockout-async-template.js first
-// which is hosted at: https://github.com/Archs/knockout-async-template
 func AsyncTemplateConfig() *AsynchronousTemplateConfig {
 	return &AsynchronousTemplateConfig{
-		Object: ko().Get("externalTemplateEngine"),
+		Object: js.Global.Get("ko").Get("externalTemplateEngine"),
 	}
 }
 

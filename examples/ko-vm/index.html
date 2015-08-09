@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>KO VM Struct Test</title>
+</head>
+<div>
+    <span data-bind="mytext: str"></span>
+    <br>
+    <span data-bind="test: int, param: 123"></span>
+    <br>
+    <ul data-bind="foreach: arr">
+        <li data-bind="text: $data"></li>
+    </ul>
+</div>
+
+<body>
+</body>
+<script type="text/javascript" src="ko-vm.js"></script>
+
+</html>

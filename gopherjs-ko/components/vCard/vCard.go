@@ -2,21 +2,22 @@ package vCard
 
 import (
 	"github.com/Archs/js/gopherjs-ko"
+	"github.com/Archs/js/gopherjs-ko/plugins/mapping"
 	"github.com/gopherjs/gopherjs/js"
 )
 
 type vcard struct {
-	*js.Object
+	*ko.BaseViewModel
 	FirstName *ko.Observable `js:"FirstName"`
 	LastName  *ko.Observable `js:"LastName"`
 	AvatarUrl *ko.Observable `js:"AvatarUrl"`
-	FullName  *ko.Computed   `js:"FullName"`
+	FullName  *ko.Observable `js:"FullName"`
 	About     *ko.Observable `js:"About"`
 }
 
 func newvc() *vcard {
 	v := new(vcard)
-	v.Object = js.Global.Get("Object").New()
+	v.BaseViewModel = ko.NewBaseViewModel()
 	v.FirstName = ko.NewObservable("Knockout")
 	v.LastName = ko.NewObservable("JS")
 	v.AvatarUrl = ko.NewObservable()
@@ -69,10 +70,14 @@ var (
 )
 
 func init() {
-	ko.Components().RegisterEx("ko-vcard", func(params *js.Object, info *ko.ComponentInfo) interface{} {
+	c := ko.NewComponent("ko-vcard")
+	c.Template.Markup = template
+	c.Style = cssRules
+	c.ViewModel.Creator = func(params *js.Object, info *ko.ComponentInfo) ko.ViewModel {
 		println("info.Element:", info.Element)
 		vm := newvc()
-		ko.Mapping().Target(vm).FromJS(params)
+		mapping.New().Target(vm).FromJS(params)
 		return vm
-	}, template, cssRules)
+	}
+	ko.RegisterComponent(c)
 }

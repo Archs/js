@@ -1,7 +1,7 @@
 // Package uploader implements a KnockoutJS component: file uploader.
 //
 // Use it like this in html files after import this package:
-//  <ko-uploader params="uploadUrl:'/uploadUrl', text:'Browser', buttonCls:'button round expand'"></ko-uploader>
+//  <ko-uploader params="uploadUrl:'/uploadUrl', text:'Browser', buttonCls:'button round expand', multiple:true"></ko-uploader>
 //  <span data-bind="component: {name:'ko-uploader',params:{uploadUrl:'/uploadUrl', text:'Browser', buttonCls:'button round expand'}}"></span>
 package uploader
 
@@ -14,8 +14,8 @@ import (
 
 const (
 	template = `
-		<button data-bind="click: onUploaderButtonClick, text: text, attr: { class: buttonCls}" ></button>
-    	<input type="file" style="display:none" data-bind="event:{change:onFileInputChange}">
+		<button data-bind="click: onUploaderButtonClick, text: text, attr: { class: buttonCls }" ></button>
+    	<input type="file" style="display:none" data-bind="event:{change:onFileInputChange}, attr:{multiple: multiple}">
     `
 )
 
@@ -33,10 +33,11 @@ func SetErrorCallback(cb func(url string, files []*dom.File, statusCode int)) {
 }
 
 type uploader struct {
-	*js.Object
+	*ko.BaseViewModel
 	text                  *ko.Observable                        `js:"text"`
 	url                   *ko.Observable                        `js:"uploadUrl"`
 	buttonCls             *ko.Observable                        `js:"buttonCls"`
+	multiple              *ko.Observable                        `js:"multiple"`
 	onFileInputChange     func(data *js.Object, evt *dom.Event) `js:"onFileInputChange"`
 	onUploaderButtonClick func(data *js.Object, evt *dom.Event) `js:"onUploaderButtonClick"`
 	target                *dom.Element
@@ -44,10 +45,11 @@ type uploader struct {
 
 func newUploader() *uploader {
 	u := new(uploader)
-	u.Object = js.Global.Get("Object").New()
+	u.BaseViewModel = ko.NewBaseViewModel()
 	u.url = ko.NewObservable("/asdafsdf")
 	u.text = ko.NewObservable("Browser")
 	u.buttonCls = ko.NewObservable("")
+	u.multiple = ko.NewObservable()
 	u.onFileInputChange = func(data *js.Object, evt *dom.Event) {
 		println("onclick event:", evt.Type)
 		u.target = evt.Target
@@ -85,11 +87,11 @@ func (u *uploader) upload() {
 }
 
 func init() {
-	ko.Components().RegisterEx("ko-uploader", func(params *js.Object, info *ko.ComponentInfo) interface{} {
+	ko.RegisterComponentLite("ko-uploader", template, func(params *js.Object) ko.ViewModel {
 		vm := newUploader()
 		url := params.Get("uploadUrl")
 		if url == js.Undefined {
-			panic(info.Element.TagName + " Error:url for uploader must be provided")
+			panic(" Error:url for uploader must be provided")
 		}
 		vm.url.Set(url)
 		text := params.Get("text")
@@ -100,6 +102,10 @@ func init() {
 		if cls != js.Undefined {
 			vm.buttonCls.Set(cls)
 		}
+		multiple := params.Get("multiple")
+		if multiple != js.Undefined && multiple.Bool() {
+			vm.multiple.Set(multiple)
+		}
 		return vm
-	}, template, "")
+	})
 }
