@@ -80,7 +80,7 @@ func (u *uploader) upload() {
 	}
 	// upload ok
 	if callback != nil {
-		callback(u.url.Get().String(), files, req.Status)
+		callback(u.url.Get().String(), files)
 	}
 }
 
