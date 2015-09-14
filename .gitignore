@@ -6,3 +6,4 @@ resources/
 app.js*
 *.js.map
 *.js
+*.db
