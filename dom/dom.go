@@ -247,6 +247,46 @@ func Alert(msg string) {
 	js.Global.Call("alert", msg)
 }
 
+type File struct {
+	*js.Object
+	// 	File.lastModifiedDate Read only
+	// The last modified Date of the file referenced by the File object.
+	LastModifiledData *js.Object `js:"lastModifiedDate"`
+	// File.name Read only
+	Name string `js:"name"`
+	// The name of the file referenced by the File object.
+	// File.fileName  Read only  Obsolete since Gecko 7.0
+	// The name of the file referenced by the File object.
+	// File.fileSize  Read only  Obsolete since Gecko 7.0
+	// The size of the referenced file in bytes.
+}
+
+func (e *Element) Files() []*File {
+	files := e.Get("files")
+	out := make([]*File, files.Get("length").Int())
+	for i := range out {
+		out[i] = &File{Object: files.Call("item", i)}
+	}
+	return out
+}
+
+type FormData struct {
+	*js.Object
+	Append func(name string, val interface{}) `js:"append"`
+	// the below function in only support by firefox
+	// Delete func(name string)                   `js:"delete"`
+	// Has    func(name string) bool              `js:"has"`
+	// Set    func(name string, val interface{})  `js:"set"`
+	// Get    func(name string) (val interface{}) `js:"get"`
+}
+
+func NewFormData() *FormData {
+	o := js.Global.Get("FormData").New()
+	return &FormData{
+		Object: o,
+	}
+}
+
 // Type Event implements the Event interface and is embedded by
 // concrete event types.
 type Event struct {
