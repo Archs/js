@@ -1,7 +1,7 @@
 // Package uploader implements a KnockoutJS component: file uploader.
 //
 // Use it like this in html files after import this package:
-//  <ko-uploader params="uploadUrl:'/uploadUrl', text:'Browser', buttonCls:'button round expand'"></ko-uploader>
+//  <ko-uploader params="uploadUrl:'/uploadUrl', text:'Browser', buttonCls:'button round expand', multiple:true"></ko-uploader>
 //  <span data-bind="component: {name:'ko-uploader',params:{uploadUrl:'/uploadUrl', text:'Browser', buttonCls:'button round expand'}}"></span>
 package uploader
 
@@ -14,8 +14,8 @@ import (
 
 const (
 	template = `
-		<button data-bind="click: onUploaderButtonClick, text: text, attr: { class: buttonCls}" ></button>
-    	<input type="file" style="display:none" data-bind="event:{change:onFileInputChange}">
+		<button data-bind="click: onUploaderButtonClick, text: text, attr: { class: buttonCls }" ></button>
+    	<input type="file" style="display:none" data-bind="event:{change:onFileInputChange}, attr:{multiple: multiple}">
     `
 )
 
@@ -37,6 +37,7 @@ type uploader struct {
 	text                  *ko.Observable                        `js:"text"`
 	url                   *ko.Observable                        `js:"uploadUrl"`
 	buttonCls             *ko.Observable                        `js:"buttonCls"`
+	multiple              *ko.Observable                        `js:"multiple"`
 	onFileInputChange     func(data *js.Object, evt *dom.Event) `js:"onFileInputChange"`
 	onUploaderButtonClick func(data *js.Object, evt *dom.Event) `js:"onUploaderButtonClick"`
 	target                *dom.Element
@@ -48,6 +49,7 @@ func newUploader() *uploader {
 	u.url = ko.NewObservable("/asdafsdf")
 	u.text = ko.NewObservable("Browser")
 	u.buttonCls = ko.NewObservable("")
+	u.multiple = ko.NewObservable()
 	u.onFileInputChange = func(data *js.Object, evt *dom.Event) {
 		println("onclick event:", evt.Type)
 		u.target = evt.Target
@@ -99,6 +101,10 @@ func init() {
 		cls := params.Get("buttonCls")
 		if cls != js.Undefined {
 			vm.buttonCls.Set(cls)
+		}
+		multiple := params.Get("multiple")
+		if multiple != js.Undefined && multiple.Bool() {
+			vm.multiple.Set(multiple)
 		}
 		return vm
 	}, template, "")
