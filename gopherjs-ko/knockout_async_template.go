@@ -8,6 +8,8 @@ type AsynchronousTemplateConfig struct {
 	*js.Object
 }
 
+// Must load knockout-async-template.js first
+// which is hosted at: https://github.com/Archs/knockout-async-template
 func AsyncTemplateConfig() *AsynchronousTemplateConfig {
 	return &AsynchronousTemplateConfig{
 		Object: ko().Get("externalTemplateEngine"),
