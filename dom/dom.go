@@ -318,6 +318,12 @@ type Event struct {
 	GetModifierState func(keyArg string) bool `js:"getModifierState"`
 }
 
+func WrapEvent(event *js.Object) *Event {
+	return &Event{
+		Object: event,
+	}
+}
+
 // func (e *Element) AddEventListener(typ string, listener func(*Event), useCapture ...bool) func(*js.Object) {
 // 	capture := false
 // 	if len(useCapture) >= 1 {
