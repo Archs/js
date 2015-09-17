@@ -69,7 +69,8 @@ var (
 )
 
 func init() {
-	ko.Components().RegisterEx("ko-vcard", func(params *js.Object) interface{} {
+	ko.Components().RegisterEx("ko-vcard", func(params *js.Object, info *ko.ComponentInfo) interface{} {
+		println("info.Element:", info.Element)
 		vm := newvc()
 		ko.Mapping().Target(vm).FromJS(params)
 		return vm
