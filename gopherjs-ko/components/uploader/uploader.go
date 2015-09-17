@@ -19,6 +19,19 @@ const (
     `
 )
 
+var (
+	callback    func(url string, files []*dom.File)
+	errCallback func(url string, files []*dom.File, statusCode int)
+)
+
+func SetCallback(cb func(url string, files []*dom.File)) {
+	callback = cb
+}
+
+func SetErrorCallback(cb func(url string, files []*dom.File, statusCode int)) {
+	errCallback = cb
+}
+
 type uploader struct {
 	*js.Object
 	text                  *ko.Observable                        `js:"text"`
@@ -57,7 +70,15 @@ func (u *uploader) upload() {
 	}
 	req := xhr.NewRequest("POST", u.url.Get().String())
 	println("xhr url:", u.url.Get().String())
-	req.Send(fd)
+	err := req.Send(fd)
+	if err == nil && callback != nil {
+		callback(u.url.Get().String(), files)
+		return
+	}
+	if err != nil && errCallback != nil {
+		errCallback(u.url.Get().String(), files, req.Status)
+		return
+	}
 }
 
 func init() {
