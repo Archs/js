@@ -196,6 +196,8 @@ type Element struct {
 	//   Events which are bubbling upward through the tree will not trigger a listener designated to use capture.
 	AddEventListener    func(eventType string, listener func(*Event), useCapture ...bool) `js:"addEventListener"`
 	RemoveEventListener func(eventType string, listener func(*Event), useCapture ...bool) `js:"removeEventListener"`
+	DispatchEvent       func(*Event)                                                      `js:"dispatchEvent"`
+	Click               func()                                                            `js:"click"`
 }
 
 // func (e *Element) Style() *CSSStyleDeclaration {
@@ -362,6 +364,10 @@ func WrapEvent(event *js.Object) *Event {
 	return &Event{
 		Object: event,
 	}
+}
+
+func NewEvent(evt_type string) *Event {
+	return WrapEvent(js.Global.Get("Event").New(evt_type))
 }
 
 // func (e *Element) AddEventListener(typ string, listener func(*Event), useCapture ...bool) func(*js.Object) {
