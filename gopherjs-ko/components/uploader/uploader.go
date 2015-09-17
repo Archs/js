@@ -71,13 +71,16 @@ func (u *uploader) upload() {
 	req := xhr.NewRequest("POST", u.url.Get().String())
 	println("xhr url:", u.url.Get().String())
 	err := req.Send(fd)
-	if err == nil && callback != nil {
-		callback(u.url.Get().String(), files)
+	// when network error or response error
+	if err != nil || req.Status != 200 {
+		if errCallback != nil {
+			errCallback(u.url.Get().String(), files, req.Status)
+		}
 		return
 	}
-	if err != nil && errCallback != nil {
-		errCallback(u.url.Get().String(), files, req.Status)
-		return
+	// upload ok
+	if callback != nil {
+		callback(u.url.Get().String(), files, req.Status)
 	}
 }
 
