@@ -1,1 +1,0 @@
-# gopherjs bindings of vue.js
