@@ -32,12 +32,27 @@ func post(r render.Render, req *http.Request) {
 	r.JSON(http.StatusOK, req.Form)
 }
 
+type JsonData struct {
+	Str   string
+	Int   int
+	Float float64
+}
+
+func data(r render.Render) {
+	r.JSON(http.StatusOK, JsonData{
+		"Nice to see you",
+		1000,
+		128.1234,
+	})
+}
+
 func main() {
 	m := martini.Classic()
 	m.Use(martini.Static("."))
 	m.Use(render.Renderer())
 	// url map
 	m.Get("/get", get)
+	m.Get("/json", data)
 	m.Post("/post", post)
 	// run
 	m.RunOnAddr(":3000")
