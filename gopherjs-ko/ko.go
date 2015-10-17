@@ -52,6 +52,16 @@ type ViewModel interface {
 	ToJS() *js.Object
 	// set the real vm from the js side
 	FromJS(*js.Object)
+	// getter
+	Get(keyPath string) *js.Object
+	// setter
+	Set(keyPath string, value interface{})
+}
+
+func ViewModelFromJS(o *js.Object) ViewModel {
+	vm := NewBaseViewModel()
+	vm.FromJS(o)
+	return vm
 }
 
 type BaseViewModel struct {
@@ -72,14 +82,8 @@ func (b *BaseViewModel) FromJS(vm *js.Object) {
 	b.Object = vm
 }
 
-func ViewModelFromJS(o *js.Object) ViewModel {
-	vm := NewBaseViewModel()
-	vm.FromJS(o)
-	return vm
-}
-
-func (v *BaseViewModel) Set(keyPath string, value interface{}) {
-	obj := property.Get(v.Object, keyPath)
+func (b *BaseViewModel) Set(keyPath string, value interface{}) {
+	obj := property.Get(b.Object, keyPath)
 	if obj == js.Undefined {
 		// if isArray(value) {
 		//  v.Set(key, NewObservableArray(value))
@@ -92,8 +96,8 @@ func (v *BaseViewModel) Set(keyPath string, value interface{}) {
 	}
 }
 
-func (v *BaseViewModel) Get(keyPath string) *js.Object {
-	obj := property.Get(v.Object, keyPath)
+func (b *BaseViewModel) Get(keyPath string) *js.Object {
+	obj := property.Get(b.Object, keyPath)
 	if obj == js.Undefined {
 		return obj
 	}
