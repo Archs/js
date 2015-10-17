@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	ko.ApplyBindings(100)
+	ko.ApplyBindings(nil)
 }
