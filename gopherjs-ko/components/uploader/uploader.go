@@ -33,7 +33,7 @@ func SetErrorCallback(cb func(url string, files []*dom.File, statusCode int)) {
 }
 
 type uploader struct {
-	*js.Object
+	*ko.BaseViewModel
 	text                  *ko.Observable                        `js:"text"`
 	url                   *ko.Observable                        `js:"uploadUrl"`
 	buttonCls             *ko.Observable                        `js:"buttonCls"`
@@ -45,7 +45,7 @@ type uploader struct {
 
 func newUploader() *uploader {
 	u := new(uploader)
-	u.Object = js.Global.Get("Object").New()
+	u.BaseViewModel = ko.NewBaseViewModel()
 	u.url = ko.NewObservable("/asdafsdf")
 	u.text = ko.NewObservable("Browser")
 	u.buttonCls = ko.NewObservable("")
@@ -87,7 +87,7 @@ func (u *uploader) upload() {
 }
 
 func init() {
-	ko.Components().RegisterEx("ko-uploader", func(params *js.Object, info *ko.ComponentInfo) interface{} {
+	ko.RegisterComponent("ko-uploader", func(params *js.Object, info *ko.ComponentInfo) ko.ViewModel {
 		vm := newUploader()
 		url := params.Get("uploadUrl")
 		if url == js.Undefined {

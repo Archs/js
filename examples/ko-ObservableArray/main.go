@@ -2,19 +2,18 @@ package main
 
 import (
 	"github.com/Archs/js/gopherjs-ko"
-	"github.com/gopherjs/gopherjs/js"
 	"math"
 )
 
 type ViewModel struct {
-	*js.Object
-	Values   *ko.ObservableArray `js:"values"`
-	MaxValue *ko.Computed        `js:"maxValue"`
+	*ko.BaseViewModel
+	Values   *ko.Observable `js:"values"`
+	MaxValue *ko.Observable `js:"maxValue"`
 }
 
 func New() *ViewModel {
 	self := new(ViewModel)
-	self.Object = js.Global.Get("Object").New()
+	self.BaseViewModel = ko.NewBaseViewModel()
 	self.Values = ko.NewObservableArray()
 	self.MaxValue = ko.NewComputed(func() interface{} {
 		max := float64(0)
