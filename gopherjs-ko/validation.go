@@ -7,7 +7,7 @@ type ValidatedObservable struct {
 }
 
 func NewValidatedObservable(data interface{}) *ValidatedObservable {
-	return &ValidatedObservable{&Observable{ko().Call("validatedObservable", data)}}
+	return &ValidatedObservable{&Observable{ko.Call("validatedObservable", data)}}
 }
 
 func (v *ValidatedObservable) IsValid() bool {
@@ -19,7 +19,7 @@ type ValidationFuncs struct {
 }
 
 func Validation() *ValidationFuncs {
-	return &ValidationFuncs{Object: ko().Get("validation")}
+	return &ValidationFuncs{Object: ko.Get("validation")}
 }
 
 func (v *ValidationFuncs) Init(config js.M) {

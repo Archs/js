@@ -12,7 +12,7 @@ type AsynchronousTemplateConfig struct {
 // which is hosted at: https://github.com/Archs/knockout-async-template
 func AsyncTemplateConfig() *AsynchronousTemplateConfig {
 	return &AsynchronousTemplateConfig{
-		Object: ko().Get("externalTemplateEngine"),
+		Object: ko.Get("externalTemplateEngine"),
 	}
 }
 
