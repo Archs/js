@@ -229,8 +229,10 @@ type ComponentInfo struct {
 
 // Register is an easy form to create KnockoutJS component
 //  name is the component name
-//  vmCreator is the ViewModel creator with type: func(paramsMap *js.Object, info *ComponentInfo) (vm interface{})
+//  vmCreator is the ViewModel creator with type: func(paramsMap *js.Object, info *ComponentInfo) (vm ViewModel)
 // 	   vmCreator can be nil which means template only component
+//     paramsMap is configured like:
+//     <ko-uploader params="uploadUrl:'/uploadUrl', text:'Browser', buttonCls:'button round expand', multiple:true"></ko-uploader>
 //  template is the html tempalte for the component
 //  cssRules would be directly embeded in the final html page, which can be ""
 func (co *ComponentManager) Register(name string, vmCreator func(params *js.Object, info *ComponentInfo) ViewModel, template, cssRules string) {
