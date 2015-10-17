@@ -301,6 +301,8 @@ func NewWritableComputed(r func() interface{}, w func(interface{})) *Observable 
 	}
 }
 
+// for computed observable
+
 func (ob *Observable) Dispose() {
 	ob.o.Call("dispose")
 }
