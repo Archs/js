@@ -5,11 +5,9 @@ package ko
 
 import (
 	"github.com/Archs/js/dom"
-
+	"github.com/Archs/js/utils/property"
 	"github.com/gopherjs/gopherjs/js"
 )
-
-type Disposer func()
 
 type Observable struct {
 	o *js.Object
@@ -30,6 +28,56 @@ type WritableComputed struct {
 type Subscription struct {
 	*js.Object
 }
+
+// ViewModel is used to wrap ko vm object
+type ViewModel interface {
+	// return the vm for js side
+	ToJS() *js.Object
+	// set the real vm from the js side
+	FromJS(*js.Object)
+}
+
+type BaseViewModel struct {
+	*js.Object
+}
+
+func NewBaseViewModel() *BaseViewModel {
+	return &BaseViewModel{
+		Object: js.Global.Get("Object").New(),
+	}
+}
+
+func (b *BaseViewModel) ToJS() *js.Object {
+	return b.Object
+}
+
+func (b *BaseViewModel) FromJS(vm *js.Object) {
+	b.Object = vm
+}
+
+func (v *BaseViewModel) Set(keyPath string, value interface{}) {
+	obj := property.Get(v.Object, keyPath)
+	if obj == js.Undefined {
+		// if isArray(value) {
+		// 	v.Set(key, NewObservableArray(value))
+		// } else {
+		// 	v.Set(key, NewObservable(value))
+		// }
+		panic("ViewModel has no key: " + keyPath)
+	} else {
+		obj.Invoke(value)
+	}
+}
+
+func (v *BaseViewModel) Get(keyPath string) *js.Object {
+	obj := property.Get(v.Object, keyPath)
+	if obj == js.Undefined {
+		return obj
+	}
+	return obj.Invoke()
+}
+
+type Disposer func()
 
 func (s *Subscription) Dispose() {
 	s.Object.Call("dispose")
@@ -309,13 +357,10 @@ func Unwrap(ob *js.Object) *js.Object {
 // For example,
 // 	ko.applyBindings(myViewModel, document.getElementById('someElementId')).
 // This restricts the activation to the element with ID someElementId and its descendants, which is useful if you want to have multiple view models and associate each with a different region of the page.
-func ApplyBindings(args ...interface{}) {
-	if len(args) < 1 {
-		panic("ko.ApplyBindings takes at least ONE parameter")
+func ApplyBindings(vm ViewModel, el ...*dom.Element) {
+	if len(el) < 1 {
+		ko().Call("applyBindings", vm.ToJS())
+	} else {
+		ko().Call("applyBindings", vm.ToJS(), el[0])
 	}
-	if len(args) >= 2 {
-		ko().Call("applyBindings", args[0], args[1])
-		return
-	}
-	ko().Call("applyBindings", args[0])
 }
