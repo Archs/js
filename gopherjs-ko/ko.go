@@ -10,15 +10,17 @@ import (
 )
 
 var (
-	ko         *js.Object
-	extenders  *js.Object
-	components *js.Object
+	ko              *js.Object
+	extenders       *js.Object
+	components      *js.Object
+	bindingHandlers *js.Object
 )
 
 func init() {
 	ko = js.Global.Get("ko")
 	extenders = ko.Get("extenders")
 	components = ko.Get("components")
+	bindingHandlers = ko.Get("bindingHandlers")
 }
 
 type Observable struct {
@@ -68,6 +70,12 @@ func (b *BaseViewModel) ToJS() *js.Object {
 
 func (b *BaseViewModel) FromJS(vm *js.Object) {
 	b.Object = vm
+}
+
+func ViewModelFromJS(o *js.Object) ViewModel {
+	vm := NewBaseViewModel()
+	vm.FromJS(o)
+	return vm
 }
 
 func (v *BaseViewModel) Set(keyPath string, value interface{}) {
@@ -306,13 +314,16 @@ func RegisterURLTemplateLoader() {
 	})
 }
 
-// - 'params' is an object whose key/value pairs are the parameters
-//   passed from the component binding or custom element
-// - 'componentInfo.element' is the element the component is being
-//   injected into. When createViewModel is called, the template has
-//   already been injected into this element, but isn't yet bound.
-// - 'componentInfo.templateNodes' is an array containing any DOM
-//   nodes that have been supplied to the component. See below.
+// ComponentInfo
+//  'params' is an object whose key/value pairs are the parameters
+//    passed from the component binding or custom element
+//
+//  'componentInfo.element' is the element the component is being
+//    injected into. When createViewModel is called, the template has
+//    already been injected into this element, but isn't yet bound.
+//
+//  'componentInfo.templateNodes' is an array containing any DOM
+//    nodes that have been supplied to the component. See below.
 type ComponentInfo struct {
 	*js.Object
 	Element *dom.Element `js:"element"`
@@ -356,8 +367,136 @@ func RegisterComponent(name string, vmCreator func(params *js.Object, info *Comp
 	})
 }
 
-func Unwrap(ob *js.Object) *js.Object {
+type BindingContext struct {
+	*js.Object
+	parent *js.Object `js:"$parent"`
+	// $parents
+	// This is an array representing all of the parent view models:
+	parents *js.Object `js:"$parents"`
+
+	// $parents[0] is the view model from the parent context (i.e., it’s the same as $parent)
+
+	// $parents[1] is the view model from the grandparent context
+
+	// $parents[2] is the view model from the great-grandparent context
+
+	// … and so on.
+
+	// $root
+	// This is the main view model object in the root context, i.e., the topmost parent context. It’s usually the object that was passed to ko.applyBindings. It is equivalent to $parents[$parents.length - 1].
+	root *js.Object `js:"$root"`
+
+	// $component
+	// If you’re within the context of a particular component template, then $component refers to the viewmodel for that component. It’s the component-specific equivalent to $root. In the case of nested components, $component refers to the viewmodel for the closest component.
+	component *js.Object `js:"$component"`
+
+	// This is useful, for example, if a component’s template includes one or more foreach blocks in which you wish to refer to some property or function on the component viewmodel rather than on the current data item.
+
+	// $data
+	// This is the view model object in the current context. In the root context, $data and $root are equivalent. Inside a nested binding context, this parameter will be set to the current data item (e.g., inside a with: person binding, $data will be set to person). $data is useful when you want to reference the viewmodel itself, rather than a property on the viewmodel. Example:
+	data *js.Object `js:"$data"`
+
+	// <ul data-bind="foreach: ['cats', 'dogs', 'fish']">
+	//     <li>The value is <span data-bind="text: $data"></span></li>
+	// </ul>
+	// $index (only available within foreach bindings)
+
+	// This is the zero-based index of the current array entry being rendered by a foreach binding. Unlike the other binding context properties, $index is an observable and is updated whenever the index of the item changes (e.g., if items are added to or removed from the array).
+
+	// $parentContext
+	// This refers to the binding context object at the parent level. This is different from $parent, which refers to the data (not binding context) at the parent level. This is useful, for example, if you need to access the index value of an outer foreach item from an inner context (usage: $parentContext.$index). This is undefined in the root context.
+	parentContext *js.Object `js:"$parentContext"`
+
+	// $rawData
+	// This is the raw view model value in the current context. Usually this will be the same as $data, but if the view model provided to Knockout is wrapped in an observable, $data will be the unwrapped view model, and $rawData will be the observable itself.
+	rawData *js.Object `js:"$rawData"`
+
+	// $componentTemplateNodes
+	// If you’re within the context of a particular component template, then $componentTemplateNodes is an array containing any DOM nodes that were passed to that component. This makes it easy to build components that receive templates, for example a grid component that accepts a template to define its output rows. For a complete example, see passing markup into components.
+	componentTemplateNodes *js.Object `js:"$componentTemplateNodes"`
+}
+
+// This is the view model object in the parent context,
+// the one immeditely outside the current context.
+// In the root context, this is undefined.
+func (b *BindingContext) Parent() ViewModel {
+	vm := NewBaseViewModel()
+	vm.FromJS(b.parent)
+	return vm
+}
+
+// This is the main view model object in the root context, i.e., the topmost parent context. It’s usually the object that was passed to ko.applyBindings. It is equivalent to $parents[$parents.length - 1].
+func (b *BindingContext) Root() ViewModel {
+	vm := NewBaseViewModel()
+	vm.FromJS(b.root)
+	return vm
+}
+
+// This is the view model object in the current context. In the root context, $data and $root are equivalent. Inside a nested binding context, this parameter will be set to the current data item (e.g., inside a with: person binding, $data will be set to person). $data is useful when you want to reference the viewmodel itself, rather than a property on the viewmodel.
+func (b *BindingContext) Data() ViewModel {
+	vm := NewBaseViewModel()
+	vm.FromJS(b.data)
+	return vm
+}
+
+// callback funtion used in custom bindings
+//
+// 	element
+// 	  The DOM element involved in this binding
+// 	valueAccessor
+// 	  A JavaScript function that you can call to get the current model property that is involved in this binding. Call this without passing any parameters (i.e., call valueAccessor()) to get the current model property value. To easily accept both observable and plain values, call ko.unwrap on the returned value.
+// 	allBindings
+// 	  A JavaScript object that you can use to access all the model values bound to this DOM element. Call allBindings.get('name') to retrieve the value of the name binding (returns undefined if the binding doesn’t exist); or allBindings.has('name') to determine if the name binding is present for the current element.
+// 	viewModel
+// 	  This parameter is deprecated in Knockout 3.x. Use bindingContext.$data or bindingContext.$rawData to access the view model instead.
+// 	bindingContext
+// 	  An object that holds the binding context available to this element’s bindings. This object includes special properties including $parent, $parents, and $root that can be used to access data that is bound against ancestors of this context.
+//
+// original javascritp signature
+// 	function(element, valueAccessor, allBindings, viewModel, bindingContext)
+type CustomBindingCallback func(element *dom.Element, valueAccessor func() *js.Object, allBindings *js.Object, viewmodel *js.Object, bindingContext *BindingContext)
+
+func (c CustomBindingCallback) unwrap() CustomBindingCallback {
+	return func(element *dom.Element, valueAccessor func() *js.Object, allBindings *js.Object, viewmodel *js.Object, bindingContext *BindingContext) {
+		va := func() *js.Object {
+			return unwrap(valueAccessor())
+		}
+		c(element, va, allBindings, viewmodel, bindingContext)
+	}
+}
+
+// unwrap observable or plain js.Object to plain *js.Object
+//
+// Call this without passing any parameters (i.e., call valueAccessor())
+// to get the current MODEL PROPERTY VALUE.
+// To easily accept BOTH OBSERVABLE AND PLAIN VALUES,
+// call ko.unwrap on the returned value.
+func unwrap(ob *js.Object) *js.Object {
 	return ko.Call("unwrap", ob)
+}
+
+func RegisterCustomBinding(name string, init, update CustomBindingCallback) {
+	bindingHandlers.Set(name, js.M{
+		"init":   init.unwrap(),
+		"update": update.unwrap(),
+	})
+}
+
+// easy form of CustomBindingCallback
+type BindingCallback func(el *dom.Element, valueAccessor func() *js.Object)
+
+func (b BindingCallback) raw() CustomBindingCallback {
+	if b == nil {
+		return nil
+	}
+	return func(element *dom.Element, valueAccessor func() *js.Object, allBindings *js.Object, viewmodel *js.Object, bindingContext *BindingContext) {
+		b(element, valueAccessor)
+	}
+}
+
+// easy form of RegisterCustomBinding
+func RegisterBinding(name string, init, update BindingCallback) {
+	RegisterCustomBinding(name, init.raw(), update.raw())
 }
 
 // In case you’re wondering what the parameters to ko.applyBindings do,
