@@ -6,8 +6,9 @@ import (
 
 type TestVM struct {
 	*ko.BaseViewModel
-	Str *ko.Observable `js:"str"`
-	Int *ko.Observable `js:"int"`
+	Str   *ko.Observable `js:"str"`
+	Int   *ko.Observable `js:"int"`
+	Array *ko.Observable `js:"arr"`
 }
 
 func newVM() *TestVM {
@@ -17,6 +18,7 @@ func newVM() *TestVM {
 	vm.BaseViewModel = ko.NewBaseViewModel()
 	vm.Str = ko.NewObservable("nice to see you")
 	vm.Int = ko.NewObservable(1000)
+	vm.Array = ko.NewObservableArray([]int{1, 2, 3, 4, 5})
 	return vm
 }
 
