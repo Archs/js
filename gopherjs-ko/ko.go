@@ -27,8 +27,8 @@ type Observable struct {
 	o *js.Object
 }
 
-func (ob *Observable) ToJS() *js.Object {
-	return ob.o
+func (o *Observable) ToJS() *js.Object {
+	return o.o
 }
 
 func ObservableFromJS(o *js.Object) *Observable {
@@ -108,24 +108,23 @@ func (s *Subscription) Dispose() {
 	s.Object.Call("dispose")
 }
 
-func (ob *Observable) Set(data interface{}) {
-	ob.o.Invoke(data)
+func (o *Observable) Set(data interface{}) {
+	o.o.Invoke(data)
 }
 
-func (ob *Observable) Get() *js.Object {
-	return ob.o.Invoke()
+func (o *Observable) Get() *js.Object {
+	return o.o.Invoke()
 }
 
-func (ob *Observable) Subscribe(fn func(*js.Object)) *Subscription {
-	o := ob.o.Call("subscribe", fn)
+func (o *Observable) Subscribe(fn func(*js.Object)) *Subscription {
 	return &Subscription{
-		Object: o,
+		Object: o.o.Call("subscribe", fn),
 	}
 }
 
-func (ob *Observable) Extend(params js.M) *Observable {
-	ob.o.Call("extend", params)
-	return ob
+func (o *Observable) Extend(params js.M) *Observable {
+	o.o.Call("extend", params)
+	return o
 }
 
 // The function takes in the observable itself as the first argument
@@ -150,12 +149,12 @@ func RegisterExtender(name string, fn func(*Observable, *js.Object) *Observable)
 //
 // when "notifyWhenChangesStop" is true change envent will be fired only after no change event detects anymore.
 // "notifyWhenChangesStop" default is false, then it works under "notifyAtFixedRate" mode, at most one change in one timeframe.
-func (ob *Observable) RateLimit(timeframeMS int, notifyWhenChangesStop ...bool) {
+func (o *Observable) RateLimit(timeframeMS int, notifyWhenChangesStop ...bool) {
 	method := "notifyAtFixedRate"
 	if len(notifyWhenChangesStop) >= 1 && notifyWhenChangesStop[0] {
 		method = "notifyWhenChangesStop"
 	}
-	ob.Extend(js.M{
+	o.Extend(js.M{
 		"rateLimit": js.M{
 			"timeout": timeframeMS,
 			"method":  method,
@@ -168,8 +167,8 @@ func (ob *Observable) RateLimit(timeframeMS int, notifyWhenChangesStop ...bool) 
 // However, it is possible to use the built-in notify extender to ensure
 // that a computed observable’s subscribers are always notified on an update,
 // even if the value is the same.
-func (ob *Observable) NotifyAlways() {
-	ob.Extend(js.M{
+func (o *Observable) NotifyAlways() {
+	o.Extend(js.M{
 		"notify": "always",
 	})
 }
@@ -184,35 +183,35 @@ func NewObservableArray(data ...interface{}) *Observable {
 }
 
 // adds a new item to the end of array
-func (ob *Observable) IndexOf(data interface{}) int {
-	return ob.o.Call("indexOf", data).Int()
+func (o *Observable) IndexOf(data interface{}) int {
+	return o.o.Call("indexOf", data).Int()
 }
 
 // removes the last value from the array and returns it
-func (ob *Observable) Pop() *js.Object {
-	return ob.o.Call("pop")
+func (o *Observable) Pop() *js.Object {
+	return o.o.Call("pop")
 }
 
 // inserts a new item at the beginning of the array
-func (ob *Observable) Unshift(data interface{}) {
-	ob.o.Call("unshift", data)
+func (o *Observable) Unshift(data interface{}) {
+	o.o.Call("unshift", data)
 }
 
 // removes the first value from the array and returns it
-func (ob *Observable) Shift() *js.Object {
-	return ob.o.Call("shift")
+func (o *Observable) Shift() *js.Object {
+	return o.o.Call("shift")
 }
 
-func (ob *Observable) Reverse() {
-	ob.o.Call("reverse")
+func (o *Observable) Reverse() {
+	o.o.Call("reverse")
 }
 
-func (ob *Observable) Sort() {
-	ob.o.Call("sort")
+func (o *Observable) Sort() {
+	o.o.Call("sort")
 }
 
-func (ob *Observable) SortFunc(fn func(*js.Object, *js.Object)) {
-	ob.o.Call("sort", fn)
+func (o *Observable) SortFunc(fn func(*js.Object, *js.Object)) {
+	o.o.Call("sort", fn)
 }
 
 // removes and returns a given number of elements starting from a given index.
@@ -220,32 +219,32 @@ func (ob *Observable) SortFunc(fn func(*js.Object, *js.Object)) {
 //      myObservable.splice(1, 3)
 // removes three elements starting from index position 1
 // (i.e., the 2nd, 3rd, and 4th elements) and returns them as an array.
-func (ob *Observable) Splice(i, n int) *js.Object {
-	return ob.o.Call("splice", i, n)
+func (o *Observable) Splice(i, n int) *js.Object {
+	return o.o.Call("splice", i, n)
 }
 
-func (ob *Observable) RemoveAll(items ...interface{}) *js.Object {
-	return ob.o.Call("removeAll", items...)
+func (o *Observable) RemoveAll(items ...interface{}) *js.Object {
+	return o.o.Call("removeAll", items...)
 }
 
-func (ob *Observable) Index(i int) *js.Object {
-	return ob.Get().Index(i)
+func (o *Observable) Index(i int) *js.Object {
+	return o.Get().Index(i)
 }
 
-func (ob *Observable) Length() int {
-	return ob.Get().Length()
+func (o *Observable) Length() int {
+	return o.Get().Length()
 }
 
-func (ob *Observable) Push(data interface{}) {
-	ob.o.Call("push", data)
+func (o *Observable) Push(data interface{}) {
+	o.o.Call("push", data)
 }
 
-func (ob *Observable) Remove(item interface{}) *js.Object {
-	return ob.o.Call("remove", item)
+func (o *Observable) Remove(item interface{}) *js.Object {
+	return o.o.Call("remove", item)
 }
 
-func (ob *Observable) RemoveFunc(fn func(*js.Object) bool) *js.Object {
-	return ob.o.Call("remove", fn)
+func (o *Observable) RemoveFunc(fn func(*js.Object) bool) *js.Object {
+	return o.o.Call("remove", fn)
 }
 
 // for computed observable
@@ -263,13 +262,13 @@ func NewWritableComputed(r func() interface{}, w func(interface{})) *Observable 
 	}
 }
 
-func (ob *Observable) Dispose() {
-	ob.o.Call("dispose")
+func (o *Observable) Dispose() {
+	o.o.Call("dispose")
 }
 
 // Returns the current value of the computed observable without creating a dependency
-func (ob *Observable) Peek() *js.Object {
-	return ob.o.Call("peek")
+func (o *Observable) Peek() *js.Object {
+	return o.o.Call("peek")
 }
 
 // returns true for observables, observable arrays, and all computed observables.
@@ -277,13 +276,13 @@ func IsObservable(o interface{}) bool {
 	return ko.Call("isObservable", o).Bool()
 }
 
-func (ob *Observable) IsComputedObservable() bool {
-	return ko.Call("isComputed", ob.o).Bool()
+func (o *Observable) IsComputedObservable() bool {
+	return ko.Call("isComputed", o.o).Bool()
 }
 
 // returns true for writable computed observables only
-func (ob *Observable) IsWritableObservable() bool {
-	return ko.Call("isWritableObservable", ob.o).Bool()
+func (o *Observable) IsWritableObservable() bool {
+	return ko.Call("isWritableObservable", o.o).Bool()
 }
 
 // RegisterURLTemplateLoader register a new template loader which can be used to load
@@ -500,8 +499,8 @@ func (c CustomBindingCallback) unwrap() CustomBindingCallback {
 // to get the current MODEL PROPERTY VALUE.
 // To easily accept BOTH OBSERVABLE AND PLAIN VALUES,
 // call ko.unwrap on the returned value.
-func unwrap(ob *js.Object) *js.Object {
-	return ko.Call("unwrap", ob)
+func unwrap(o *js.Object) *js.Object {
+	return ko.Call("unwrap", o)
 }
 
 // RegisterCustomBinding
