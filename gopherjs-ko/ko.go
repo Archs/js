@@ -201,17 +201,17 @@ func (ob *ObservableArray) RemoveFunc(fn func(*js.Object) bool) *js.Object {
 	return ob.o.Call("remove", fn)
 }
 
-type ComponentsFuncs struct {
+type ComponentManager struct {
 	o *js.Object
 }
 
-func Components() *ComponentsFuncs {
-	return &ComponentsFuncs{
+func Components() *ComponentManager {
+	return &ComponentManager{
 		o: ko().Get("components"),
 	}
 }
 
-func (co *ComponentsFuncs) Register(name string, params js.M) {
+func (co *ComponentManager) rawRegister(name string, params js.M) {
 	co.o.Call("register", name, params)
 }
 
@@ -227,13 +227,13 @@ type ComponentInfo struct {
 	Element *dom.Element `js:"element"`
 }
 
-// RegisterEx is an easy form to create KnockoutJS components
+// Register is an easy form to create KnockoutJS component
 //  name is the component name
 //  vmCreator is the ViewModel creator with type: func(paramsMap *js.Object, info *ComponentInfo) (vm interface{})
 // 	   vmCreator can be nil which means template only component
 //  template is the html tempalte for the component
 //  cssRules would be directly embeded in the final html page, which can be ""
-func (co *ComponentsFuncs) RegisterEx(name string, vmCreator func(params *js.Object, info *ComponentInfo) interface{}, template, cssRules string) {
+func (co *ComponentManager) Register(name string, vmCreator func(params *js.Object, info *ComponentInfo) ViewModel, template, cssRules string) {
 	// embed the cssRules
 	if cssRules != "" {
 		style := dom.CreateElement("style")
@@ -242,15 +242,18 @@ func (co *ComponentsFuncs) RegisterEx(name string, vmCreator func(params *js.Obj
 	}
 	// template only component
 	if vmCreator == nil {
-		co.Register(name, js.M{
+		co.rawRegister(name, js.M{
 			"template": template,
 		})
 		return
 	}
 	// register the component
-	co.Register(name, js.M{
+	co.rawRegister(name, js.M{
 		"viewModel": js.M{
-			"createViewModel": vmCreator,
+			"createViewModel": func(params *js.Object, info *ComponentInfo) *js.Object {
+				vm := vmCreator(params, info)
+				return vm.ToJS()
+			},
 		},
 		"template": template,
 	})
