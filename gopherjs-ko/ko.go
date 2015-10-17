@@ -551,6 +551,8 @@ func RegisterBinding(name string, init, update BindingCallback) {
 // For example,
 //  ko.applyBindings(myViewModel, document.getElementById('someElementId')).
 // This restricts the activation to the element with ID someElementId and its descendants, which is useful if you want to have multiple view models and associate each with a different region of the page.
+//
+// the vm can be nil, indicating direct apply
 func ApplyBindings(vm ViewModel, el ...*dom.Element) {
 	if vm == nil {
 		ko.Call("applyBindings")
