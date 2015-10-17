@@ -33,6 +33,13 @@ func ObservableFromJS(o *js.Object) *Observable {
 	return &Observable{o}
 }
 
+func NewObservable(data ...interface{}) *Observable {
+	if len(data) >= 1 {
+		return &Observable{ko.Call("observable", data[0])}
+	}
+	return &Observable{ko.Call("observable")}
+}
+
 type Subscription struct {
 	*js.Object
 }
@@ -159,6 +166,13 @@ func (ob *Observable) NotifyAlways() {
 
 // for observable array
 
+func NewObservableArray(data ...interface{}) *Observable {
+	if len(data) >= 1 {
+		return &Observable{ko.Call("observableArray", data[0])}
+	}
+	return &Observable{ko.Call("observableArray")}
+}
+
 // adds a new item to the end of array
 func (ob *Observable) IndexOf(data interface{}) int {
 	return ob.o.Call("indexOf", data).Int()
@@ -224,69 +238,7 @@ func (ob *Observable) RemoveFunc(fn func(*js.Object) bool) *js.Object {
 	return ob.o.Call("remove", fn)
 }
 
-func rawRegister(name string, params js.M) {
-	components.Call("register", name, params)
-}
-
-// - 'params' is an object whose key/value pairs are the parameters
-//   passed from the component binding or custom element
-// - 'componentInfo.element' is the element the component is being
-//   injected into. When createViewModel is called, the template has
-//   already been injected into this element, but isn't yet bound.
-// - 'componentInfo.templateNodes' is an array containing any DOM
-//   nodes that have been supplied to the component. See below.
-type ComponentInfo struct {
-	*js.Object
-	Element *dom.Element `js:"element"`
-}
-
-// RegisterComponent is an easy form to create KnockoutJS component
-//  name is the component name
-//  vmCreator is the ViewModel creator with type: func(paramsMap *js.Object, info *ComponentInfo) (vm ViewModel)
-// 	   vmCreator can be nil which means template only component
-//     paramsMap is configured like:
-//     <ko-uploader params="uploadUrl:'/uploadUrl', text:'Browser', buttonCls:'button round expand', multiple:true"></ko-uploader>
-//  template is the html tempalte for the component
-//  cssRules would be directly embeded in the final html page, which can be ""
-func RegisterComponent(name string, vmCreator func(params *js.Object, info *ComponentInfo) ViewModel, template, cssRules string) {
-	// embed the cssRules
-	if cssRules != "" {
-		style := dom.CreateElement("style")
-		style.InnerHTML = cssRules
-		dom.Body().AppendChild(style)
-	}
-	// template only component
-	if vmCreator == nil {
-		rawRegister(name, js.M{
-			"template": template,
-		})
-		return
-	}
-	// register the component
-	rawRegister(name, js.M{
-		"viewModel": js.M{
-			"createViewModel": func(params *js.Object, info *ComponentInfo) *js.Object {
-				vm := vmCreator(params, info)
-				return vm.ToJS()
-			},
-		},
-		"template": template,
-	})
-}
-
-func NewObservable(data ...interface{}) *Observable {
-	if len(data) >= 1 {
-		return &Observable{ko.Call("observable", data[0])}
-	}
-	return &Observable{ko.Call("observable")}
-}
-
-func NewObservableArray(data ...interface{}) *Observable {
-	if len(data) >= 1 {
-		return &Observable{ko.Call("observableArray", data[0])}
-	}
-	return &Observable{ko.Call("observableArray")}
-}
+// for computed observable
 
 func NewComputed(fn func() interface{}) *Observable {
 	return &Observable{ko.Call("computed", fn)}
@@ -300,8 +252,6 @@ func NewWritableComputed(r func() interface{}, w func(interface{})) *Observable 
 		}),
 	}
 }
-
-// for computed observable
 
 func (ob *Observable) Dispose() {
 	ob.o.Call("dispose")
@@ -353,6 +303,56 @@ func RegisterURLTemplateLoader() {
 
 	components.Get("loaders").Call("unshift", js.M{
 		"loadTemplate": loader,
+	})
+}
+
+// - 'params' is an object whose key/value pairs are the parameters
+//   passed from the component binding or custom element
+// - 'componentInfo.element' is the element the component is being
+//   injected into. When createViewModel is called, the template has
+//   already been injected into this element, but isn't yet bound.
+// - 'componentInfo.templateNodes' is an array containing any DOM
+//   nodes that have been supplied to the component. See below.
+type ComponentInfo struct {
+	*js.Object
+	Element *dom.Element `js:"element"`
+}
+
+func rawRegister(name string, params js.M) {
+	components.Call("register", name, params)
+}
+
+// RegisterComponent is an easy form to create KnockoutJS component
+//  name is the component name
+//  vmCreator is the ViewModel creator with type: func(paramsMap *js.Object, info *ComponentInfo) (vm ViewModel)
+// 	   vmCreator can be nil which means template only component
+//     paramsMap is configured like:
+//     <ko-uploader params="uploadUrl:'/uploadUrl', text:'Browser', buttonCls:'button round expand', multiple:true"></ko-uploader>
+//  template is the html tempalte for the component
+//  cssRules would be directly embeded in the final html page, which can be ""
+func RegisterComponent(name string, vmCreator func(params *js.Object, info *ComponentInfo) ViewModel, template, cssRules string) {
+	// embed the cssRules
+	if cssRules != "" {
+		style := dom.CreateElement("style")
+		style.InnerHTML = cssRules
+		dom.Body().AppendChild(style)
+	}
+	// template only component
+	if vmCreator == nil {
+		rawRegister(name, js.M{
+			"template": template,
+		})
+		return
+	}
+	// register the component
+	rawRegister(name, js.M{
+		"viewModel": js.M{
+			"createViewModel": func(params *js.Object, info *ComponentInfo) *js.Object {
+				vm := vmCreator(params, info)
+				return vm.ToJS()
+			},
+		},
+		"template": template,
 	})
 }
 
