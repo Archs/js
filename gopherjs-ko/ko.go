@@ -25,16 +25,12 @@ type Observable struct {
 	o *js.Object
 }
 
-type ObservableArray struct {
-	*Observable
+func (o *Observable) ToJS() *js.Object {
+	return o.o
 }
 
-type Computed struct {
-	*Observable
-}
-
-type WritableComputed struct {
-	*Computed
+func ObservableFromJS(o *js.Object) *Observable {
+	return &Observable{o}
 }
 
 type Subscription struct {
@@ -115,9 +111,17 @@ func (ob *Observable) Extend(params js.M) *Observable {
 	return ob
 }
 
-func CreateExtender(name string, fn func(target *Observable, option *js.Object) *Observable) {
-	xs := ko.Get("extenders")
-	xs.Set(name, fn)
+// The function takes in the observable itself as the first argument
+// and any options in the second argument.
+//
+// It can then either return the observable or
+// return something new like a computed observable that uses the original observable in some way.
+func RegisterExtender(name string, fn func(*Observable, *js.Object) *Observable) {
+	extenders.Set(name, func(t *js.Object, options *js.Object) *js.Object {
+		target := ObservableFromJS(t)
+		o := fn(target, options)
+		return o.ToJS()
+	})
 }
 
 // The rateLimit extender, however, causes an observable to suppress and delay change notifications for a specified period of time. A rate-limited observable therefore updates dependencies asynchronously.
@@ -153,83 +157,75 @@ func (ob *Observable) NotifyAlways() {
 	})
 }
 
+// for observable array
+
 // adds a new item to the end of array
-func (ob *ObservableArray) IndexOf(data interface{}) int {
+func (ob *Observable) IndexOf(data interface{}) int {
 	return ob.o.Call("indexOf", data).Int()
 }
 
 // removes the last value from the array and returns it
-func (ob *ObservableArray) Pop() *js.Object {
+func (ob *Observable) Pop() *js.Object {
 	return ob.o.Call("pop")
 }
 
 // inserts a new item at the beginning of the array
-func (ob *ObservableArray) Unshift(data interface{}) {
+func (ob *Observable) Unshift(data interface{}) {
 	ob.o.Call("unshift", data)
 }
 
 // removes the first value from the array and returns it
-func (ob *ObservableArray) Shift() *js.Object {
+func (ob *Observable) Shift() *js.Object {
 	return ob.o.Call("shift")
 }
 
-func (ob *ObservableArray) Reverse() {
+func (ob *Observable) Reverse() {
 	ob.o.Call("reverse")
 }
 
-func (ob *ObservableArray) Sort() {
+func (ob *Observable) Sort() {
 	ob.o.Call("sort")
 }
 
-func (ob *ObservableArray) SortFunc(fn func(*js.Object, *js.Object)) {
+func (ob *Observable) SortFunc(fn func(*js.Object, *js.Object)) {
 	ob.o.Call("sort", fn)
 }
 
 // removes and returns a given number of elements starting from a given index.
 // For example,
-// 		myObservableArray.splice(1, 3)
+// 		myObservable.splice(1, 3)
 // removes three elements starting from index position 1
 // (i.e., the 2nd, 3rd, and 4th elements) and returns them as an array.
-func (ob *ObservableArray) Splice(i, n int) *js.Object {
+func (ob *Observable) Splice(i, n int) *js.Object {
 	return ob.o.Call("splice", i, n)
 }
 
-func (ob *ObservableArray) RemoveAll(items ...interface{}) *js.Object {
+func (ob *Observable) RemoveAll(items ...interface{}) *js.Object {
 	return ob.o.Call("removeAll", items...)
 }
 
-func (ob *ObservableArray) Index(i int) *js.Object {
+func (ob *Observable) Index(i int) *js.Object {
 	return ob.Get().Index(i)
 }
 
-func (ob *ObservableArray) Length() int {
+func (ob *Observable) Length() int {
 	return ob.Get().Length()
 }
 
-func (ob *ObservableArray) Push(data interface{}) {
+func (ob *Observable) Push(data interface{}) {
 	ob.o.Call("push", data)
 }
 
-func (ob *ObservableArray) Remove(item interface{}) *js.Object {
+func (ob *Observable) Remove(item interface{}) *js.Object {
 	return ob.o.Call("remove", item)
 }
 
-func (ob *ObservableArray) RemoveFunc(fn func(*js.Object) bool) *js.Object {
+func (ob *Observable) RemoveFunc(fn func(*js.Object) bool) *js.Object {
 	return ob.o.Call("remove", fn)
 }
 
-type ComponentManager struct {
-	o *js.Object
-}
-
-func Components() *ComponentManager {
-	return &ComponentManager{
-		o: ko.Get("components"),
-	}
-}
-
-func (co *ComponentManager) rawRegister(name string, params js.M) {
-	co.o.Call("register", name, params)
+func rawRegister(name string, params js.M) {
+	components.Call("register", name, params)
 }
 
 // - 'params' is an object whose key/value pairs are the parameters
@@ -244,7 +240,7 @@ type ComponentInfo struct {
 	Element *dom.Element `js:"element"`
 }
 
-// Register is an easy form to create KnockoutJS component
+// RegisterComponent is an easy form to create KnockoutJS component
 //  name is the component name
 //  vmCreator is the ViewModel creator with type: func(paramsMap *js.Object, info *ComponentInfo) (vm ViewModel)
 // 	   vmCreator can be nil which means template only component
@@ -252,7 +248,7 @@ type ComponentInfo struct {
 //     <ko-uploader params="uploadUrl:'/uploadUrl', text:'Browser', buttonCls:'button round expand', multiple:true"></ko-uploader>
 //  template is the html tempalte for the component
 //  cssRules would be directly embeded in the final html page, which can be ""
-func (co *ComponentManager) Register(name string, vmCreator func(params *js.Object, info *ComponentInfo) ViewModel, template, cssRules string) {
+func RegisterComponent(name string, vmCreator func(params *js.Object, info *ComponentInfo) ViewModel, template, cssRules string) {
 	// embed the cssRules
 	if cssRules != "" {
 		style := dom.CreateElement("style")
@@ -261,13 +257,13 @@ func (co *ComponentManager) Register(name string, vmCreator func(params *js.Obje
 	}
 	// template only component
 	if vmCreator == nil {
-		co.rawRegister(name, js.M{
+		rawRegister(name, js.M{
 			"template": template,
 		})
 		return
 	}
 	// register the component
-	co.rawRegister(name, js.M{
+	rawRegister(name, js.M{
 		"viewModel": js.M{
 			"createViewModel": func(params *js.Object, info *ComponentInfo) *js.Object {
 				vm := vmCreator(params, info)
@@ -285,51 +281,47 @@ func NewObservable(data ...interface{}) *Observable {
 	return &Observable{ko.Call("observable")}
 }
 
-func NewObservableArray(data ...interface{}) *ObservableArray {
+func NewObservableArray(data ...interface{}) *Observable {
 	if len(data) >= 1 {
-		return &ObservableArray{&Observable{ko.Call("observableArray", data[0])}}
+		return &Observable{ko.Call("observableArray", data[0])}
 	}
-	return &ObservableArray{&Observable{ko.Call("observableArray")}}
+	return &Observable{ko.Call("observableArray")}
 }
 
-func NewComputed(fn func() interface{}) *Computed {
-	return &Computed{&Observable{ko.Call("computed", fn)}}
+func NewComputed(fn func() interface{}) *Observable {
+	return &Observable{ko.Call("computed", fn)}
 }
 
-func NewWritableComputed(r func() interface{}, w func(interface{})) *WritableComputed {
-	return &WritableComputed{
-		&Computed{
-			&Observable{
-				ko.Call("computed", js.M{
-					"read":  r,
-					"write": w,
-				}),
-			},
-		},
+func NewWritableComputed(r func() interface{}, w func(interface{})) *Observable {
+	return &Observable{
+		ko.Call("computed", js.M{
+			"read":  r,
+			"write": w,
+		}),
 	}
 }
 
-func (ob *Computed) Dispose() {
+func (ob *Observable) Dispose() {
 	ob.o.Call("dispose")
 }
 
 // Returns the current value of the computed observable without creating a dependency
-func (ob *Computed) Peek() *js.Object {
+func (ob *Observable) Peek() *js.Object {
 	return ob.o.Call("peek")
 }
 
 // returns true for observables, observable arrays, and all computed observables.
-func IsObservable(data interface{}) bool {
-	return ko.Call("isObservable", data).Bool()
+func IsObservable(o interface{}) bool {
+	return ko.Call("isObservable", o).Bool()
 }
 
-func IsComputed(data interface{}) bool {
-	return ko.Call("isComputed", data).Bool()
+func (o *Observable) IsComputedObservable() bool {
+	return ko.Call("isComputed", o.o).Bool()
 }
 
-// returns true for observables, observable arrays, and writable computed observables
-func IsWritableObservable(data interface{}) bool {
-	return ko.Call("isWritableObservable", data).Bool()
+// returns true for writable computed observables only
+func (o *Observable) IsWritableObservable() bool {
+	return ko.Call("isWritableObservable", o.o).Bool()
 }
 
 // RegisterURLTemplateLoader register a new template loader which can be used to load
@@ -349,7 +341,7 @@ func RegisterURLTemplateLoader() {
 				// We need an array of DOM nodes, not a string.
 				// We can use the default loader to convert to the
 				// required format.
-				Components().o.Get("defaultLoader").Call("loadTemplate", name, data, callback)
+				components.Get("defaultLoader").Call("loadTemplate", name, data, callback)
 			})
 		} else {
 			// Unrecognized config format. Let another loader handle it.
@@ -357,7 +349,7 @@ func RegisterURLTemplateLoader() {
 		}
 	}
 
-	Components().o.Get("loaders").Call("unshift", js.M{
+	components.Get("loaders").Call("unshift", js.M{
 		"loadTemplate": loader,
 	})
 }
