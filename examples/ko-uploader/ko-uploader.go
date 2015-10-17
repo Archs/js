@@ -12,5 +12,5 @@ func main() {
 			println("upload", file.Name, "to", url, "done")
 		}
 	})
-	ko.ApplyBindings(10)
+	ko.ApplyBindings(nil)
 }
