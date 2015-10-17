@@ -82,9 +82,9 @@ func (v *BaseViewModel) Set(keyPath string, value interface{}) {
 	obj := property.Get(v.Object, keyPath)
 	if obj == js.Undefined {
 		// if isArray(value) {
-		// 	v.Set(key, NewObservableArray(value))
+		//  v.Set(key, NewObservableArray(value))
 		// } else {
-		// 	v.Set(key, NewObservable(value))
+		//  v.Set(key, NewObservable(value))
 		// }
 		panic("ViewModel has no key: " + keyPath)
 	} else {
@@ -143,8 +143,8 @@ func RegisterExtender(name string, fn func(*Observable, *js.Object) *Observable)
 //
 // The rateLimit extender can be applied to any type of observable, including observable arrays and computed observables. The main use cases for rate-limiting are:
 //
-// 		1. Making things respond after a certain delay
-// 		2. Combining multiple changes into a single update
+//      1. Making things respond after a certain delay
+//      2. Combining multiple changes into a single update
 //
 // when "notifyWhenChangesStop" is true change envent will be fired only after no change event detects anymore.
 // "notifyWhenChangesStop" default is false, then it works under "notifyAtFixedRate" mode, at most one change in one timeframe.
@@ -215,7 +215,7 @@ func (ob *Observable) SortFunc(fn func(*js.Object, *js.Object)) {
 
 // removes and returns a given number of elements starting from a given index.
 // For example,
-// 		myObservable.splice(1, 3)
+//      myObservable.splice(1, 3)
 // removes three elements starting from index position 1
 // (i.e., the 2nd, 3rd, and 4th elements) and returns them as an array.
 func (ob *Observable) Splice(i, n int) *js.Object {
@@ -336,7 +336,7 @@ func rawRegister(name string, params js.M) {
 // RegisterComponent is an easy form to create KnockoutJS component
 //  name is the component name
 //  vmCreator is the ViewModel creator with type: func(paramsMap *js.Object, info *ComponentInfo) (vm ViewModel)
-// 	   vmCreator can be nil which means template only component
+//     vmCreator can be nil which means template only component
 //     paramsMap is configured like:
 //     <ko-uploader params="uploadUrl:'/uploadUrl', text:'Browser', buttonCls:'button round expand', multiple:true"></ko-uploader>
 //  template is the html tempalte for the component
@@ -439,25 +439,48 @@ func (b *BindingContext) Data() ViewModel {
 	return vm
 }
 
+type AllBindings struct {
+	*js.Object
+}
+
+func (a *AllBindings) Has(name string) bool {
+	return a.Call("has", name).Bool()
+}
+
+func (a *AllBindings) Get(name string) *js.Object {
+	return a.Call("get", name)
+}
+
 // callback funtion used in custom bindings
 //
-// 	element
-// 	  The DOM element involved in this binding
-// 	valueAccessor
-// 	  A JavaScript function that you can call to get the current model property that is involved in this binding. Call this without passing any parameters (i.e., call valueAccessor()) to get the current model property value. To easily accept both observable and plain values, call ko.unwrap on the returned value.
-// 	allBindings
-// 	  A JavaScript object that you can use to access all the model values bound to this DOM element. Call allBindings.get('name') to retrieve the value of the name binding (returns undefined if the binding doesn’t exist); or allBindings.has('name') to determine if the name binding is present for the current element.
-// 	viewModel
-// 	  This parameter is deprecated in Knockout 3.x. Use bindingContext.$data or bindingContext.$rawData to access the view model instead.
-// 	bindingContext
-// 	  An object that holds the binding context available to this element’s bindings. This object includes special properties including $parent, $parents, and $root that can be used to access data that is bound against ancestors of this context.
+//  element
+//    The DOM element involved in this binding
+//  valueAccessor
+//    A JavaScript function that you can call to get the current model property
+//    that is involved in this binding. Call this without passing any parameters
+//    (i.e., call valueAccessor()) to get the current model property value.
+//    To easily accept both observable and plain values, call ko.unwrap on the returned value.
+//  allBindings
+//    A JavaScript object that you can use to access all the model values
+//    bound to this DOM element.
+//    Call allBindings.get('name') to retrieve the value of the name binding
+//    (returns undefined if the binding doesn’t exist);
+//    or allBindings.has('name') to determine if the name binding is present
+//    for the current element.
+//  viewModel
+//    This parameter is deprecated in Knockout 3.x.
+//    Use bindingContext.$data or bindingContext.$rawData to access the view model instead.
+//  bindingContext
+//    An object that holds the binding context available to this element’s bindings.
+//    This object includes special properties including $parent, $parents,
+//    and $root that can be used to access data that is bound against ancestors of this context.
 //
 // original javascritp signature
-// 	function(element, valueAccessor, allBindings, viewModel, bindingContext)
-type CustomBindingCallback func(element *dom.Element, valueAccessor func() *js.Object, allBindings *js.Object, viewmodel *js.Object, bindingContext *BindingContext)
+//  function(element, valueAccessor, allBindings, viewModel, bindingContext)
+type CustomBindingCallback func(element *dom.Element, valueAccessor func() *js.Object, allBindings *AllBindings, viewmodel *js.Object, bindingContext *BindingContext)
 
 func (c CustomBindingCallback) unwrap() CustomBindingCallback {
-	return func(element *dom.Element, valueAccessor func() *js.Object, allBindings *js.Object, viewmodel *js.Object, bindingContext *BindingContext) {
+	return func(element *dom.Element, valueAccessor func() *js.Object, allBindings *AllBindings, viewmodel *js.Object, bindingContext *BindingContext) {
 		va := func() *js.Object {
 			return unwrap(valueAccessor())
 		}
@@ -489,7 +512,7 @@ func (b BindingCallback) raw() CustomBindingCallback {
 	if b == nil {
 		return nil
 	}
-	return func(element *dom.Element, valueAccessor func() *js.Object, allBindings *js.Object, viewmodel *js.Object, bindingContext *BindingContext) {
+	return func(element *dom.Element, valueAccessor func() *js.Object, allBindings *AllBindings, viewmodel *js.Object, bindingContext *BindingContext) {
 		b(element, valueAccessor)
 	}
 }
@@ -506,7 +529,7 @@ func RegisterBinding(name string, init, update BindingCallback) {
 // Optionally, you can pass a second parameter to define which part of the document you want to search for data-bind attributes.
 //
 // For example,
-// 	ko.applyBindings(myViewModel, document.getElementById('someElementId')).
+//  ko.applyBindings(myViewModel, document.getElementById('someElementId')).
 // This restricts the activation to the element with ID someElementId and its descendants, which is useful if you want to have multiple view models and associate each with a different region of the page.
 func ApplyBindings(vm ViewModel, el ...*dom.Element) {
 	if len(el) < 1 {
