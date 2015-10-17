@@ -9,6 +9,18 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
+var (
+	ko         *js.Object
+	extenders  *js.Object
+	components *js.Object
+)
+
+func init() {
+	ko = js.Global.Get("ko")
+	extenders = ko.Get("extenders")
+	components = ko.Get("components")
+}
+
 type Observable struct {
 	o *js.Object
 }
@@ -101,6 +113,11 @@ func (ob *Observable) Subscribe(fn func(*js.Object)) *Subscription {
 func (ob *Observable) Extend(params js.M) *Observable {
 	ob.o.Call("extend", params)
 	return ob
+}
+
+func CreateExtender(name string, fn func(target *Observable, option *js.Object) *Observable) {
+	xs := ko.Get("extenders")
+	xs.Set(name, fn)
 }
 
 // The rateLimit extender, however, causes an observable to suppress and delay change notifications for a specified period of time. A rate-limited observable therefore updates dependencies asynchronously.
@@ -207,7 +224,7 @@ type ComponentManager struct {
 
 func Components() *ComponentManager {
 	return &ComponentManager{
-		o: ko().Get("components"),
+		o: ko.Get("components"),
 	}
 }
 
@@ -261,33 +278,29 @@ func (co *ComponentManager) Register(name string, vmCreator func(params *js.Obje
 	})
 }
 
-func ko() *js.Object {
-	return js.Global.Get("ko")
-}
-
 func NewObservable(data ...interface{}) *Observable {
 	if len(data) >= 1 {
-		return &Observable{ko().Call("observable", data[0])}
+		return &Observable{ko.Call("observable", data[0])}
 	}
-	return &Observable{ko().Call("observable")}
+	return &Observable{ko.Call("observable")}
 }
 
 func NewObservableArray(data ...interface{}) *ObservableArray {
 	if len(data) >= 1 {
-		return &ObservableArray{&Observable{ko().Call("observableArray", data[0])}}
+		return &ObservableArray{&Observable{ko.Call("observableArray", data[0])}}
 	}
-	return &ObservableArray{&Observable{ko().Call("observableArray")}}
+	return &ObservableArray{&Observable{ko.Call("observableArray")}}
 }
 
 func NewComputed(fn func() interface{}) *Computed {
-	return &Computed{&Observable{ko().Call("computed", fn)}}
+	return &Computed{&Observable{ko.Call("computed", fn)}}
 }
 
 func NewWritableComputed(r func() interface{}, w func(interface{})) *WritableComputed {
 	return &WritableComputed{
 		&Computed{
 			&Observable{
-				ko().Call("computed", js.M{
+				ko.Call("computed", js.M{
 					"read":  r,
 					"write": w,
 				}),
@@ -307,16 +320,16 @@ func (ob *Computed) Peek() *js.Object {
 
 // returns true for observables, observable arrays, and all computed observables.
 func IsObservable(data interface{}) bool {
-	return ko().Call("isObservable", data).Bool()
+	return ko.Call("isObservable", data).Bool()
 }
 
 func IsComputed(data interface{}) bool {
-	return ko().Call("isComputed", data).Bool()
+	return ko.Call("isComputed", data).Bool()
 }
 
 // returns true for observables, observable arrays, and writable computed observables
 func IsWritableObservable(data interface{}) bool {
-	return ko().Call("isWritableObservable", data).Bool()
+	return ko.Call("isWritableObservable", data).Bool()
 }
 
 // RegisterURLTemplateLoader register a new template loader which can be used to load
@@ -350,7 +363,7 @@ func RegisterURLTemplateLoader() {
 }
 
 func Unwrap(ob *js.Object) *js.Object {
-	return ko().Call("unwrap", ob)
+	return ko.Call("unwrap", ob)
 }
 
 // In case you’re wondering what the parameters to ko.applyBindings do,
@@ -364,8 +377,8 @@ func Unwrap(ob *js.Object) *js.Object {
 // This restricts the activation to the element with ID someElementId and its descendants, which is useful if you want to have multiple view models and associate each with a different region of the page.
 func ApplyBindings(vm ViewModel, el ...*dom.Element) {
 	if len(el) < 1 {
-		ko().Call("applyBindings", vm.ToJS())
+		ko.Call("applyBindings", vm.ToJS())
 	} else {
-		ko().Call("applyBindings", vm.ToJS(), el[0])
+		ko.Call("applyBindings", vm.ToJS(), el[0])
 	}
 }

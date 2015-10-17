@@ -13,7 +13,7 @@ type Mapper struct {
 
 func Mapping() *Mapper {
 	return &Mapper{
-		Object: ko().Get("mapping"),
+		Object: ko.Get("mapping"),
 	}
 }
 
