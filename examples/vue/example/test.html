@@ -1,0 +1,39 @@
+<div id="demo" v-cloak>
+  <h1>{{title | uppercase}}</h1>
+  <input v-model="title"> <button v-on="click: change">Change</button>
+  <ul>
+    <li
+      v-repeat="todos"
+      v-on="click: done = !done"
+      v-showdone="done | testf"
+      class="{{done ? 'done' : ''}}">
+      {{content}}
+    </li>
+  </ul>
+
+  <div v-component="my-cpnt">
+    asdfasdf
+  </div>
+
+  <my-cpnt></my-cpnt>
+
+  <js-clock width=150 height=150></js-clock>
+</div>
+
+<style type="text/css">
+body {
+  font-family: Helvetica Neue, Arial, sans-serif;
+}
+
+[v-cloak] { display: none }
+
+li.done {
+    text-decoration: line-through;
+}
+</style>
+
+<script type="text/javascript" src="vendor/vue.js"></script>
+
+<script type="text/javascript" src="app.js">
+</script>
+
