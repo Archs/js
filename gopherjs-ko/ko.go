@@ -358,7 +358,10 @@ func RegisterComponent(name string, vmCreator func(params *js.Object, info *Comp
 		"viewModel": js.M{
 			"createViewModel": func(params *js.Object, info *ComponentInfo) *js.Object {
 				vm := vmCreator(params, info)
-				return vm.ToJS()
+				if vm != nil {
+					return vm.ToJS()
+				}
+				return nil
 			},
 		},
 		"template": template,
