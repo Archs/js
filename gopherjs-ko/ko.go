@@ -293,6 +293,15 @@ func (o *Observable) IsWritableObservable() bool {
 	return ko().Call("isWritableObservable", o.o).Bool()
 }
 
+type TemplateNodes struct {
+	*js.Object
+	Length int `js:"length"`
+}
+
+func (t *TemplateNodes) Item(idx int) *dom.Element {
+	return dom.WrapElement(t.Index(idx))
+}
+
 // ComponentInfo
 //  'params' is an object whose key/value pairs are the parameters
 //    passed from the component binding or custom element
@@ -302,14 +311,14 @@ func (o *Observable) IsWritableObservable() bool {
 //    already been injected into this element, but isn't yet bound.
 //
 //  'componentInfo.templateNodes' is an array containing any DOM
-//    nodes that have been supplied to the component. See below.
+//    nodes that have been supplied to the component.
 type ComponentInfo struct {
 	*js.Object
 	Element *dom.Element `js:"element"`
 	// DOM nodes inside custom element or component will be stripped out (without being bound to any viewmodel)
 	// and replaced by the component’s output.
 	// However, those DOM nodes aren’t lost: they are remembered, and are supplied to the component as an array
-	TemplateNodes *dom.HTMLCollection `js:"templateNodes"`
+	TemplateNodes *TemplateNodes `js:"templateNodes"`
 }
 
 type ComponentVModelConfig struct {
@@ -411,7 +420,7 @@ func rawRegisterComponent(name string, params js.M) {
 // RegisterComponent is used to create KnockoutJS component with more options
 func RegisterComponent(c *Component) {
 	if c.Style != "" {
-		style := dom.CreateElement("style")
+		style := dom.Document().CreateElement("style")
 		style.InnerHTML = c.Style
 		dom.Body().AppendChild(style)
 	}
