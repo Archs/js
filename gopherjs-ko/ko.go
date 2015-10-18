@@ -422,11 +422,11 @@ func RegisterComponent(c *Component) {
 	})
 }
 
-// RegisterMarkupComponent is an easy form to create KnockoutJS component
+// RegisterComponentLite is an easy form to create KnockoutJS component
 //  name is the component name
 //  vmConstructor is the ViewModel Constructor
 //  markup is the html tempalte for the component
-func RegisterMarkupComponent(name, markup string, vmConstructor func(params *js.Object) ViewModel) {
+func RegisterComponentLite(name, markup string, vmConstructor func(params *js.Object) ViewModel) {
 	c := NewComponent(name)
 	c.ViewModel.Constructor = vmConstructor
 	c.Template.Markup = markup
@@ -591,9 +591,9 @@ func RegisterCustomBinding(name string, init, update CustomBindingCallback) {
 }
 
 // easy form of CustomBindingCallback
-type BindingCallback func(el *dom.Element, valueAccessor func() *js.Object)
+type BindingCallbackLite func(el *dom.Element, valueAccessor func() *js.Object)
 
-func (b BindingCallback) raw() CustomBindingCallback {
+func (b BindingCallbackLite) raw() CustomBindingCallback {
 	if b == nil {
 		return nil
 	}
@@ -603,7 +603,7 @@ func (b BindingCallback) raw() CustomBindingCallback {
 }
 
 // easy form of RegisterCustomBinding
-func RegisterBinding(name string, init, update BindingCallback) {
+func RegisterBindingLite(name string, init, update BindingCallbackLite) {
 	RegisterCustomBinding(name, init.raw(), update.raw())
 }
 
