@@ -298,10 +298,117 @@ func (o *Observable) IsWritableObservable() bool {
 type ComponentInfo struct {
 	*js.Object
 	Element *dom.Element `js:"element"`
+	// DOM nodes inside custom element or component will be stripped out (without being bound to any viewmodel)
+	// and replaced by the component’s output.
+	// However, those DOM nodes aren’t lost: they are remembered, and are supplied to the component as an array
+	TemplateNodes *dom.HTMLCollection `js:"templateNodes"`
+}
+
+type Component struct {
+	// The component name can be any nonempty string.
+	// It’s recommended, but not mandatory, to use lowercase dash-separated strings (such as your-component-name)
+	// so that the component name is valid to use as a custom element (such as <your-component-name>).
+	Name string
+	// ViewModel is optional
+	// if set only one of its struct member should be provided
+	// Constructor > Creator
+	ViewModel struct {
+		// Knockout will invoke your constructor once for each instance of the component,
+		// producing a separate viewmodel object for each.
+		//
+		// 'params' is an object whose key/value pairs are the parameters
+		// passed from the component binding or custom element.
+		Constructor func(params *js.Object) ViewModel
+		// If you want to run any setup logic on the associated element before it is bound to the viewmodel,
+		// or use arbitrary logic to decide which viewmodel class to instantiate you can use VmCreator
+		Creator func(params *js.Object, info *ComponentInfo) ViewModel
+	}
+	// Template must be provided
+	// and only one of its struct member should be provided
+	// Markup > Id > Instance
+	Template struct {
+		// A string of markup
+		Markup string
+		// An existing element ID
+		Id string
+		// An existing element instance
+		Instance *dom.Element
+	}
+	// If your component configuration has a boolean synchronous property,
+	// Knockout uses this to determine whether the component is allowed to be loaded
+	// and injected synchronously.
+	Synchronous bool // The default is false
+	// optional sytle
+	// style would be embeded in style tag
+	Style string
+}
+
+func NewComponent(name string) *Component {
+	return &Component{
+		Name: name,
+	}
+}
+
+func (c *Component) viewModel() interface{} {
+	if c.ViewModel == nil {
+		return nil
+	}
+	if c.ViewModel.Constructor != nil {
+		return func(params *js.Object) *js.Object {
+			vm := c.ViewModel.Constructor(params)
+			if vm != nil {
+				return vm.ToJS()
+			}
+			return nil
+		}
+	}
+	if c.ViewModel.Creator != nil {
+		return js.M{
+			"createViewModel": func(params *js.Object, info *ComponentInfo) *js.Object {
+				vm := c.ViewModel.Creator(params, info)
+				if vm != nil {
+					return vm.ToJS()
+				}
+				return nil
+			},
+		}
+	}
+}
+
+func (c *Component) template() interface{} {
+	if c.Template == nil {
+		panic("Template must be provided for ko.Component")
+	}
+	if c.Template.Markup != "" {
+		return c.Template.Markup
+	}
+	if c.Template.Id != "" {
+		return js.M{
+			"element": c.Template.Id,
+		}
+	}
+	if c.Template.Instance != "" {
+		return js.M{
+			"element": c.Template.Instance,
+		}
+	}
 }
 
 func rawRegister(name string, params js.M) {
 	ko().Get("components").Call("register", name, params)
+}
+
+func registerComponent(c *Component) {
+	if c.Style != "" {
+		style := dom.CreateElement("style")
+		style.InnerHTML = cssRules
+		dom.Body().AppendChild(style)
+	}
+	rawRegister(c.Name, js.M{
+		"template":    c.template(),
+		"viewModel":   c.viewModel(),
+		"synchronous": c.Synchronous,
+	})
 }
 
 // RegisterComponent is an easy form to create KnockoutJS component
