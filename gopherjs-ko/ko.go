@@ -285,36 +285,6 @@ func (o *Observable) IsWritableObservable() bool {
 	return ko().Call("isWritableObservable", o.o).Bool()
 }
 
-// RegisterURLTemplateLoader register a new template loader which can be used to load
-// template files from a webserver.
-// To use it you need to pass a map with a `url` key as template argument to your component:
-//   "template":  js.M{"url": "form.html"}
-// This loader requires jQuery.
-func RegisterURLTemplateLoader() {
-	loader := func(name string, config *js.Object, callback func(*js.Object)) {
-		url := config.Get("url")
-		if url != nil && url != js.Undefined {
-			// Some browsers are caching these requests too aggressively
-			urlStr := url.String()
-			urlStr += "?_=" + js.Global.Call("eval", `Date.now()`).String()
-
-			js.Global.Get("jQuery").Call("get", urlStr, func(data *js.Object) {
-				// We need an array of DOM nodes, not a string.
-				// We can use the default loader to convert to the
-				// required format.
-				ko().Get("components").Get("defaultLoader").Call("loadTemplate", name, data, callback)
-			})
-		} else {
-			// Unrecognized config format. Let another loader handle it.
-			callback(nil)
-		}
-	}
-
-	ko().Get("components").Get("loaders").Call("unshift", js.M{
-		"loadTemplate": loader,
-	})
-}
-
 // ComponentInfo
 //  'params' is an object whose key/value pairs are the parameters
 //    passed from the component binding or custom element
