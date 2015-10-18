@@ -7,7 +7,6 @@
 package csp
 
 import (
-	"github.com/Archs/js/gopherjs-ko"
 	"github.com/gopherjs/gopherjs/js"
 )
 
@@ -21,6 +20,7 @@ import (
 
 // Use this function to make gopherjs-ko works under chrome app/extensions.
 func EnableSecureBinding() {
+	ko := js.Global.Get("ko")
 	secureBindingsProvider := ko.Get("secureBindingsProvider")
 	ksbp := secureBindingsProvider.New(js.M{
 		"attribute":         "data-bind",               // default "data-sbind"
