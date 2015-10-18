@@ -9,28 +9,18 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-var (
-	ko              *js.Object
-	extenders       *js.Object
-	components      *js.Object
-	bindingHandlers *js.Object
-)
-
-func init() {
-	ko = js.Global.Get("ko")
-	extenders = ko.Get("extenders")
-	components = ko.Get("components")
-	bindingHandlers = ko.Get("bindingHandlers")
+func ko() *js.Object {
+	return js.Global.Get("ko")
 }
 
 // Top level getter for ko instance
 func Get(key string) *js.Object {
-	return ko.Get(key)
+	return ko().Get(key)
 }
 
 // Top level setter for ko instance
 func Set(key string, value interface{}) {
-	ko.Set(key, value)
+	ko().Set(key, value)
 }
 
 type Observable struct {
@@ -47,9 +37,9 @@ func ObservableFromJS(o *js.Object) *Observable {
 
 func NewObservable(data ...interface{}) *Observable {
 	if len(data) >= 1 {
-		return &Observable{ko.Call("observable", data[0])}
+		return &Observable{ko().Call("observable", data[0])}
 	}
-	return &Observable{ko.Call("observable")}
+	return &Observable{ko().Call("observable")}
 }
 
 type Subscription struct {
@@ -143,7 +133,7 @@ func (o *Observable) Extend(params js.M) *Observable {
 // It can then either return the observable or
 // return something new like a computed observable that uses the original observable in some way.
 func RegisterExtender(name string, fn func(*Observable, *js.Object) *Observable) {
-	extenders.Set(name, func(t *js.Object, options *js.Object) *js.Object {
+	ko().Get("extenders").Set(name, func(t *js.Object, options *js.Object) *js.Object {
 		target := ObservableFromJS(t)
 		o := fn(target, options)
 		return o.ToJS()
@@ -187,9 +177,9 @@ func (o *Observable) NotifyAlways() {
 
 func NewObservableArray(data ...interface{}) *Observable {
 	if len(data) >= 1 {
-		return &Observable{ko.Call("observableArray", data[0])}
+		return &Observable{ko().Call("observableArray", data[0])}
 	}
-	return &Observable{ko.Call("observableArray")}
+	return &Observable{ko().Call("observableArray")}
 }
 
 // adds a new item to the end of array
@@ -260,12 +250,12 @@ func (o *Observable) RemoveFunc(fn func(*js.Object) bool) *js.Object {
 // for computed observable
 
 func NewComputed(fn func() interface{}) *Observable {
-	return &Observable{ko.Call("computed", fn)}
+	return &Observable{ko().Call("computed", fn)}
 }
 
 func NewWritableComputed(r func() interface{}, w func(interface{})) *Observable {
 	return &Observable{
-		ko.Call("computed", js.M{
+		ko().Call("computed", js.M{
 			"read":  r,
 			"write": w,
 		}),
@@ -283,16 +273,16 @@ func (o *Observable) Peek() *js.Object {
 
 // returns true for observables, observable arrays, and all computed observables.
 func IsObservable(o interface{}) bool {
-	return ko.Call("isObservable", o).Bool()
+	return ko().Call("isObservable", o).Bool()
 }
 
 func (o *Observable) IsComputedObservable() bool {
-	return ko.Call("isComputed", o.o).Bool()
+	return ko().Call("isComputed", o.o).Bool()
 }
 
 // returns true for writable computed observables only
 func (o *Observable) IsWritableObservable() bool {
-	return ko.Call("isWritableObservable", o.o).Bool()
+	return ko().Call("isWritableObservable", o.o).Bool()
 }
 
 // RegisterURLTemplateLoader register a new template loader which can be used to load
@@ -312,7 +302,7 @@ func RegisterURLTemplateLoader() {
 				// We need an array of DOM nodes, not a string.
 				// We can use the default loader to convert to the
 				// required format.
-				components.Get("defaultLoader").Call("loadTemplate", name, data, callback)
+				ko().Get("components").Get("defaultLoader").Call("loadTemplate", name, data, callback)
 			})
 		} else {
 			// Unrecognized config format. Let another loader handle it.
@@ -320,7 +310,7 @@ func RegisterURLTemplateLoader() {
 		}
 	}
 
-	components.Get("loaders").Call("unshift", js.M{
+	ko().Get("components").Get("loaders").Call("unshift", js.M{
 		"loadTemplate": loader,
 	})
 }
@@ -341,7 +331,7 @@ type ComponentInfo struct {
 }
 
 func rawRegister(name string, params js.M) {
-	components.Call("register", name, params)
+	ko().Get("components").Call("register", name, params)
 }
 
 // RegisterComponent is an easy form to create KnockoutJS component
@@ -397,7 +387,7 @@ type BindingContext struct {
 	// … and so on.
 
 	// $root
-	// This is the main view model object in the root context, i.e., the topmost parent context. It’s usually the object that was passed to ko.applyBindings. It is equivalent to $parents[$parents.length - 1].
+	// This is the main view model object in the root context, i.e., the topmost parent context. It’s usually the object that was passed to ko().applyBindings. It is equivalent to $parents[$parents.length - 1].
 	root *js.Object `js:"$root"`
 
 	// $component
@@ -439,7 +429,7 @@ func (b *BindingContext) Parent() ViewModel {
 	return vm
 }
 
-// This is the main view model object in the root context, i.e., the topmost parent context. It’s usually the object that was passed to ko.applyBindings. It is equivalent to $parents[$parents.length - 1].
+// This is the main view model object in the root context, i.e., the topmost parent context. It’s usually the object that was passed to ko().applyBindings. It is equivalent to $parents[$parents.length - 1].
 func (b *BindingContext) Root() ViewModel {
 	vm := NewBaseViewModel()
 	vm.FromJS(b.root)
@@ -473,7 +463,7 @@ func (a *AllBindings) Get(name string) *js.Object {
 //    A JavaScript function that you can call to get the current model property
 //    that is involved in this binding. Call this without passing any parameters
 //    (i.e., call valueAccessor()) to get the current model property value.
-//    To easily accept both observable and plain values, call ko.unwrap on the returned value.
+//    To easily accept both observable and plain values, call ko().unwrap on the returned value.
 //    as for this go bindings this is already done
 //  allBindings
 //    A JavaScript object that you can use to access all the model values
@@ -508,9 +498,9 @@ func (c CustomBindingCallback) unwrap() CustomBindingCallback {
 // Call this without passing any parameters (i.e., call valueAccessor())
 // to get the current MODEL PROPERTY VALUE.
 // To easily accept BOTH OBSERVABLE AND PLAIN VALUES,
-// call ko.unwrap on the returned value.
+// call ko().unwrap on the returned value.
 func unwrap(o *js.Object) *js.Object {
-	return ko.Call("unwrap", o)
+	return ko().Call("unwrap", o)
 }
 
 // RegisterCustomBinding
@@ -527,11 +517,11 @@ func RegisterCustomBinding(name string, init, update CustomBindingCallback) {
 		panic("update callback must be provided for RegisterCustomBinding")
 	}
 	if init == nil {
-		bindingHandlers.Set(name, js.M{
+		ko().Get("bindingHandlers").Set(name, js.M{
 			"update": update.unwrap(),
 		})
 	} else {
-		bindingHandlers.Set(name, js.M{
+		ko().Get("bindingHandlers").Set(name, js.M{
 			"init":   init.unwrap(),
 			"update": update.unwrap(),
 		})
@@ -555,25 +545,25 @@ func RegisterBinding(name string, init, update BindingCallback) {
 	RegisterCustomBinding(name, init.raw(), update.raw())
 }
 
-// In case you’re wondering what the parameters to ko.applyBindings do,
+// In case you’re wondering what the parameters to ko().applyBindings do,
 //
 // the first parameter says what view model object you want to use with the declarative bindings it activates
 //
 // Optionally, you can pass a second parameter to define which part of the document you want to search for data-bind attributes.
 //
 // For example,
-//  ko.applyBindings(myViewModel, document.getElementById('someElementId')).
+//  ko().applyBindings(myViewModel, document.getElementById('someElementId')).
 // This restricts the activation to the element with ID someElementId and its descendants, which is useful if you want to have multiple view models and associate each with a different region of the page.
 //
 // the vm can be nil, indicating direct apply
 func ApplyBindings(vm ViewModel, el ...*dom.Element) {
 	if vm == nil {
-		ko.Call("applyBindings")
+		ko().Call("applyBindings")
 		return
 	}
 	if len(el) < 1 {
-		ko.Call("applyBindings", vm.ToJS())
+		ko().Call("applyBindings", vm.ToJS())
 	} else {
-		ko.Call("applyBindings", vm.ToJS(), el[0])
+		ko().Call("applyBindings", vm.ToJS(), el[0])
 	}
 }
