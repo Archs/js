@@ -70,12 +70,6 @@ var (
 )
 
 func init() {
-	// ko.RegisterComponent("ko-vcard", func(params *js.Object, info *ko.ComponentInfo) ko.ViewModel {
-	// 	println("info.Element:", info.Element)
-	// 	vm := newvc()
-	// 	mapping.New().Target(vm).FromJS(params)
-	// 	return vm
-	// }, template, cssRules)
 	c := ko.NewComponent("ko-vcard")
 	c.Template.Markup = template
 	c.Style = cssRules

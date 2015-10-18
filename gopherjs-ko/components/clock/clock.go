@@ -168,38 +168,10 @@ func (s *simClock) draw(t time.Time) {
 }
 
 func registerClock() {
-	// ko.RegisterComponent("clock", func(params *js.Object, info *ko.ComponentInfo) ko.ViewModel {
-	// 	el := dom.Wrap(info.Get("element"))
-	// 	c := canvas.New(el.QuerySelector("canvas").Object)
-	// 	c.Width = 200
-	// 	c.Height = 200
-	// 	if params.Get("width") != js.Undefined {
-	// 		c.Width = params.Get("width").Int()
-	// 	}
-	// 	if params.Get("height") != js.Undefined {
-	// 		c.Height = params.Get("height").Int()
-	// 	}
-	// 	if c.Width > c.Height {
-	// 		c.Width = c.Height
-	// 	} else {
-	// 		c.Height = c.Width
-	// 	}
-	// 	clock := newSimClock(c.GetContext2D(), c.Width, c.Height)
-	// 	clock.draw(time.Now())
-	// 	go func() {
-	// 		for t := range time.Tick(time.Millisecond * 100) {
-	// 			clock.draw(t)
-	// 		}
-	// 	}()
-	// 	return nil
-	// },
-	// 	"<canvas></canvas>",
-	// 	"",
-	// )
 	c := ko.NewComponent("clock")
 	c.Template.Markup = "<canvas></canvas>"
 	c.ViewModel.Creator = func(params *js.Object, info *ko.ComponentInfo) ko.ViewModel {
-		c := canvas.New(info.Element.Object)
+		c := canvas.New(info.Element.QuerySelector("canvas").Object)
 		c.Width = 200
 		c.Height = 200
 		if params.Get("width") != js.Undefined {
@@ -222,6 +194,7 @@ func registerClock() {
 		}()
 		return nil
 	}
+	ko.RegisterComponent(c)
 }
 
 func init() {
