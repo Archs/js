@@ -479,7 +479,10 @@ type BindingContext struct {
 	// This is the zero-based index of the current array entry being rendered by a foreach binding. Unlike the other binding context properties, $index is an observable and is updated whenever the index of the item changes (e.g., if items are added to or removed from the array).
 
 	// $parentContext
-	// This refers to the binding context object at the parent level. This is different from $parent, which refers to the data (not binding context) at the parent level. This is useful, for example, if you need to access the index value of an outer foreach item from an inner context (usage: $parentContext.$index). This is undefined in the root context.
+	// This refers to the binding context object at the parent level.
+	// This is different from $parent, which refers to the data (not binding context)
+	// at the parent level. This is useful, for example,
+	// if you need to access the index value of an outer foreach item from an inner context (usage: $parentContext.$index). This is undefined in the root context.
 	parentContext *js.Object `js:"$parentContext"`
 
 	// $rawData
@@ -487,8 +490,12 @@ type BindingContext struct {
 	rawData *js.Object `js:"$rawData"`
 
 	// $componentTemplateNodes
-	// If you’re within the context of a particular component template, then $componentTemplateNodes is an array containing any DOM nodes that were passed to that component. This makes it easy to build components that receive templates, for example a grid component that accepts a template to define its output rows. For a complete example, see passing markup into components.
-	componentTemplateNodes *js.Object `js:"$componentTemplateNodes"`
+	// If you’re within the context of a particular component template,
+	// then $componentTemplateNodes is an array containing any DOM nodes
+	// that were passed to that component. This makes it easy to build components
+	// that receive templates, for example a grid component
+	// that accepts a template to define its output rows.
+	componentTemplateNodes *TemplateNodes `js:"$componentTemplateNodes"`
 }
 
 // This is the view model object in the parent context,
