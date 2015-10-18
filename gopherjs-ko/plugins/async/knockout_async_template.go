@@ -1,6 +1,7 @@
-package ko
+package async
 
 import (
+	"github.com/Archs/js/gopherjs-ko"
 	"github.com/gopherjs/gopherjs/js"
 )
 

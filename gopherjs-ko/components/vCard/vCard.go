@@ -2,6 +2,7 @@ package vCard
 
 import (
 	"github.com/Archs/js/gopherjs-ko"
+	"github.com/Archs/js/gopherjs-ko/plugins/mapping"
 	"github.com/gopherjs/gopherjs/js"
 )
 
@@ -72,7 +73,7 @@ func init() {
 	ko.RegisterComponent("ko-vcard", func(params *js.Object, info *ko.ComponentInfo) ko.ViewModel {
 		println("info.Element:", info.Element)
 		vm := newvc()
-		ko.Mapping().Target(vm).FromJS(params)
+		mapping.New().Target(vm).FromJS(params)
 		return vm
 	}, template, cssRules)
 }

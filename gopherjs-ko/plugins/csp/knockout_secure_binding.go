@@ -1,6 +1,7 @@
-package ko
+package csp
 
 import (
+	"github.com/Archs/js/gopherjs-ko"
 	"github.com/gopherjs/gopherjs/js"
 )
 
@@ -21,13 +22,13 @@ import (
 // Must load knockout-secure-binding.min.js first:
 // https://github.com/brianmhunt/knockout-secure-binding
 func EnableSecureBinding() {
-	ko := js.Global.Get("ko")
-	secureBindingsProvider := ko.Get("secureBindingsProvider")
+	k := ko.GetKO()
+	secureBindingsProvider := k.Get("secureBindingsProvider")
 	ksbp := secureBindingsProvider.New(js.M{
-		"attribute":         "data-bind",               // default "data-sbind"
-		"globals":           js.Global.Get("window"),   // default {}
-		"bindings":          ko.Get("bindingHandlers"), // default ko.bindingHandlers
-		"noVirtualElements": false,                     // default true
+		"attribute":         "data-bind",              // default "data-sbind"
+		"globals":           js.Global.Get("window"),  // default {}
+		"bindings":          k.Get("bindingHandlers"), // default ko.bindingHandlers
+		"noVirtualElements": false,                    // default true
 	})
-	ko.Get("bindingProvider").Set("instance", ksbp)
+	k.Get("bindingProvider").Set("instance", ksbp)
 }

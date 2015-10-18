@@ -23,6 +23,10 @@ func init() {
 	bindingHandlers = ko.Get("bindingHandlers")
 }
 
+func GetKO() *js.Object {
+	return ko
+}
+
 type Observable struct {
 	o *js.Object
 }
