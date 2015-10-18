@@ -3,7 +3,6 @@
 package async
 
 import (
-	"github.com/Archs/js/gopherjs-ko"
 	"github.com/gopherjs/gopherjs/js"
 )
 
@@ -13,7 +12,7 @@ type AsynchronousTemplateConfig struct {
 
 func AsyncTemplateConfig() *AsynchronousTemplateConfig {
 	return &AsynchronousTemplateConfig{
-		Object: ko.Get("externalTemplateEngine"),
+		Object: js.Global.Get("ko").Get("externalTemplateEngine"),
 	}
 }
 
