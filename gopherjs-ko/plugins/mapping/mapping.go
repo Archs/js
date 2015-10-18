@@ -1,3 +1,4 @@
+// Package mapping provide bindings for knockout.mapping.js
 package mapping
 
 import (
@@ -14,7 +15,7 @@ type Mapping struct {
 
 func New() *Mapping {
 	m := &Mapping{
-		Object: ko.GetKO().Get("mapping"),
+		Object: ko.Get("mapping"),
 	}
 	println("mapping:", m.Object)
 	return m
