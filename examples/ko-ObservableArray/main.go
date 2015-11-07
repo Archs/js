@@ -32,4 +32,5 @@ func main() {
 		vm.Values.Push(i)
 	}
 	println(vm.MaxValue.Get().Float())
+	ko.ApplyBindings(vm)
 }
