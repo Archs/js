@@ -11,8 +11,8 @@ func NewValidatedObservable(data interface{}) *Observable {
 }
 
 // Only available when KnockoutJS Validation plugin is loaded
-func (v *Observable) IsValid() bool {
-	return v.o.Call("isValid").Bool()
+func (ob *Observable) IsValid() bool {
+	return ob.o.Call("isValid").Bool()
 }
 
 type ValidationFuncs struct {
