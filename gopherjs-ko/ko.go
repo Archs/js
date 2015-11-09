@@ -100,8 +100,6 @@ func (v *BaseViewModel) Get(keyPath string) *js.Object {
 	return obj.Invoke()
 }
 
-type Disposer func()
-
 func (s *Subscription) Dispose() {
 	s.Object.Call("dispose")
 }
