@@ -5,9 +5,9 @@
     <title>KO VM Struct Test</title>
 </head>
 <div>
-    <span data-bind="text: str"></span>
+    <span data-bind="mytext: str"></span>
     <br>
-    <span data-bind="text: int"></span>
+    <span data-bind="test: int, param: 123"></span>
     <br>
     <ul data-bind="foreach: arr">
         <li data-bind="text: $data"></li>
