@@ -27,8 +27,8 @@ type Observable struct {
 	o *js.Object
 }
 
-func (o *Observable) ToJS() *js.Object {
-	return o.o
+func (ob *Observable) ToJS() *js.Object {
+	return ob.o
 }
 
 func ObservableFromJS(o *js.Object) *Observable {
@@ -275,13 +275,13 @@ func IsObservable(o interface{}) bool {
 	return ko.Call("isObservable", o).Bool()
 }
 
-func (o *Observable) IsComputedObservable() bool {
-	return ko.Call("isComputed", o.o).Bool()
+func (ob *Observable) IsComputedObservable() bool {
+	return ko.Call("isComputed", ob.o).Bool()
 }
 
 // returns true for writable computed observables only
-func (o *Observable) IsWritableObservable() bool {
-	return ko.Call("isWritableObservable", o.o).Bool()
+func (ob *Observable) IsWritableObservable() bool {
+	return ko.Call("isWritableObservable", ob.o).Bool()
 }
 
 // RegisterURLTemplateLoader register a new template loader which can be used to load
