@@ -2,15 +2,16 @@ package ko
 
 import "github.com/gopherjs/gopherjs/js"
 
-type ValidatedObservable struct {
-	*Observable
+var (
+	validation = ko.Get("validation")
+)
+
+func NewValidatedObservable(data interface{}) *Observable {
+	return &Observable{ko.Call("validatedObservable", data)}
 }
 
-func NewValidatedObservable(data interface{}) *ValidatedObservable {
-	return &ValidatedObservable{&Observable{ko.Call("validatedObservable", data)}}
-}
-
-func (v *ValidatedObservable) IsValid() bool {
+// Only available when KnockoutJS Validation plugin is loaded
+func (v *Observable) IsValid() bool {
 	return v.o.Call("isValid").Bool()
 }
 
@@ -18,10 +19,6 @@ type ValidationFuncs struct {
 	*js.Object
 }
 
-func Validation() *ValidationFuncs {
-	return &ValidationFuncs{Object: ko.Get("validation")}
-}
-
-func (v *ValidationFuncs) Init(config js.M) {
-	v.Call("init", config)
+func ValidationInit(config js.M) {
+	validation.Call("init", config)
 }
