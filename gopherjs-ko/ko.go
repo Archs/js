@@ -460,6 +460,7 @@ func (a *AllBindings) Get(name string) *js.Object {
 //    that is involved in this binding. Call this without passing any parameters
 //    (i.e., call valueAccessor()) to get the current model property value.
 //    To easily accept both observable and plain values, call ko.unwrap on the returned value.
+//    as for this go bindings this is already done
 //  allBindings
 //    A JavaScript object that you can use to access all the model values
 //    bound to this DOM element.
@@ -498,11 +499,29 @@ func unwrap(ob *js.Object) *js.Object {
 	return ko.Call("unwrap", ob)
 }
 
+// RegisterCustomBinding
+//
+// init
+//   This will be called when the binding is first applied to an element
+//   Set up any initial state, event handlers, etc. here
+// update
+//   This will be called once when the binding is first applied to an element,
+//   and again whenever any observables/computeds that are accessed change
+//   Update the DOM element based on the supplied values here.
 func RegisterCustomBinding(name string, init, update CustomBindingCallback) {
-	bindingHandlers.Set(name, js.M{
-		"init":   init.unwrap(),
-		"update": update.unwrap(),
-	})
+	if update == nil {
+		panic("update callback must be provided for RegisterCustomBinding")
+	}
+	if init == nil {
+		bindingHandlers.Set(name, js.M{
+			"update": update.unwrap(),
+		})
+	} else {
+		bindingHandlers.Set(name, js.M{
+			"init":   init.unwrap(),
+			"update": update.unwrap(),
+		})
+	}
 }
 
 // easy form of CustomBindingCallback
