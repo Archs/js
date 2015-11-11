@@ -122,20 +122,32 @@ func (o *Observable) Subscribe(fn func(*js.Object)) *Subscription {
 	}
 }
 
-func (o *Observable) Extend(params js.M) *Observable {
-	o.o.Call("extend", params)
+func (o *Observable) Extend(extenderName string, options interface{}) *Observable {
+	o.o.Call("extend", js.M{
+		extenderName: options,
+	})
 	return o
 }
+
+// ExtenderFunc is used to extend ko.Observable
+// 	target is the observable itself to be extended
+//  options is the used to config the extender
+//
+//  this function should return the extended *ko.Observable
+type ExtenderFunc func(target *Observable, options *js.Object) (extended *Observable)
 
 // The function takes in the observable itself as the first argument
 // and any options in the second argument.
 //
 // It can then either return the observable or
 // return something new like a computed observable that uses the original observable in some way.
-func RegisterExtender(name string, fn func(*Observable, *js.Object) *Observable) {
+func RegisterExtender(name string, fn ExtenderFunc) {
 	ko().Get("extenders").Set(name, func(t *js.Object, options *js.Object) *js.Object {
 		target := ObservableFromJS(t)
 		o := fn(target, options)
+		if o == nil {
+			panic("ExtenderFunc should return a valid ko.Observable")
+		}
 		return o.ToJS()
 	})
 }
@@ -154,11 +166,9 @@ func (o *Observable) RateLimit(timeframeMS int, notifyWhenChangesStop ...bool) {
 	if len(notifyWhenChangesStop) >= 1 && notifyWhenChangesStop[0] {
 		method = "notifyWhenChangesStop"
 	}
-	o.Extend(js.M{
-		"rateLimit": js.M{
-			"timeout": timeframeMS,
-			"method":  method,
-		},
+	o.Extend("rateLimit", js.M{
+		"timeout": timeframeMS,
+		"method":  method,
 	})
 }
 
@@ -168,9 +178,7 @@ func (o *Observable) RateLimit(timeframeMS int, notifyWhenChangesStop ...bool) {
 // that a computed observable’s subscribers are always notified on an update,
 // even if the value is the same.
 func (o *Observable) NotifyAlways() {
-	o.Extend(js.M{
-		"notify": "always",
-	})
+	o.Extend("notify", "always")
 }
 
 // for observable array
