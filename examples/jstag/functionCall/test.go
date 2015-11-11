@@ -6,7 +6,7 @@ import (
 
 func test() {
 	body := dom.Body()
-	div := dom.CreateElement("div")
+	div := dom.Document().CreateElement("div")
 	div.SetAttribute("id", "div")
 	div.SetAttribute("class", "div")
 	body.AppendChild(div)
