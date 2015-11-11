@@ -27,7 +27,7 @@ func newVM() *TestVM {
 func main() {
 	vm := newVM()
 	println("vm:", vm, vm.Str.Get().String())
-	ko.RegisterBinding("mytext", nil, func(el *dom.Element, valueAccessor func() *js.Object) {
+	ko.RegisterBindingLite("mytext", nil, func(el *dom.Element, valueAccessor func() *js.Object) {
 		println("my binding called:", valueAccessor())
 		el.InnerHTML = valueAccessor().String()
 	})
