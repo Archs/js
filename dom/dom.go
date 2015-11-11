@@ -336,9 +336,8 @@ type Element struct {
 	RemoveChild func(child *Element) `js:"removeChild"`
 	Remove      func()               `js:"remove"`
 
-	GetElementsByTagName func(tagName string) *HTMLCollection `js:"getElementsByTagName"`
-	QuerySelector        func(sel string) *Element            `js:"querySelector"`
-	QuerySelectorAll     func(sel string) *HTMLCollection     `js:"querySelectorAll"`
+	QuerySelector    func(sel string) *Element        `js:"querySelector"`
+	QuerySelectorAll func(sel string) *HTMLCollection `js:"querySelectorAll"`
 
 	Click func() `js:"click"`
 }
