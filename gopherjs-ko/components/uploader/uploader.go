@@ -87,11 +87,32 @@ func (u *uploader) upload() {
 }
 
 func init() {
-	ko.RegisterComponent("ko-uploader", func(params *js.Object, info *ko.ComponentInfo) ko.ViewModel {
+	// ko.RegisterComponent("ko-uploader", func(params *js.Object, info *ko.ComponentInfo) ko.ViewModel {
+	// 	vm := newUploader()
+	// 	url := params.Get("uploadUrl")
+	// 	if url == js.Undefined {
+	// 		panic(info.Element.TagName + " Error:url for uploader must be provided")
+	// 	}
+	// 	vm.url.Set(url)
+	// 	text := params.Get("text")
+	// 	if text != js.Undefined {
+	// 		vm.text.Set(text)
+	// 	}
+	// 	cls := params.Get("buttonCls")
+	// 	if cls != js.Undefined {
+	// 		vm.buttonCls.Set(cls)
+	// 	}
+	// 	multiple := params.Get("multiple")
+	// 	if multiple != js.Undefined && multiple.Bool() {
+	// 		vm.multiple.Set(multiple)
+	// 	}
+	// 	return vm
+	// }, template, "")
+	ko.RegisterMarkupComponent("ko-uploader", template, func(params *js.Object) ko.ViewModel {
 		vm := newUploader()
 		url := params.Get("uploadUrl")
 		if url == js.Undefined {
-			panic(info.Element.TagName + " Error:url for uploader must be provided")
+			panic(" Error:url for uploader must be provided")
 		}
 		vm.url.Set(url)
 		text := params.Get("text")
@@ -107,5 +128,5 @@ func init() {
 			vm.multiple.Set(multiple)
 		}
 		return vm
-	}, template, "")
+	})
 }
