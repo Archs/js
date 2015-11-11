@@ -304,55 +304,58 @@ type ComponentInfo struct {
 	TemplateNodes *dom.HTMLCollection `js:"templateNodes"`
 }
 
+type ComponentVModelConfig struct {
+	// Knockout will invoke your constructor once for each instance of the component,
+	// producing a separate viewmodel object for each.
+	//
+	// 'params' is an object whose key/value pairs are the parameters
+	// passed from the component binding or custom element.
+	Constructor func(params *js.Object) ViewModel
+	// If you want to run any setup logic on the associated element before it is bound to the viewmodel,
+	// or use arbitrary logic to decide which viewmodel class to instantiate you can use VmCreator
+	Creator func(params *js.Object, info *ComponentInfo) ViewModel
+}
+
+type ComponentTemplateConfig struct {
+	// A string of markup
+	Markup string
+	// An existing element ID
+	Id string
+	// An existing element instance
+	Instance *dom.Element
+}
+
 type Component struct {
 	// The component name can be any nonempty string.
 	// It’s recommended, but not mandatory, to use lowercase dash-separated strings (such as your-component-name)
 	// so that the component name is valid to use as a custom element (such as <your-component-name>).
 	Name string
 	// ViewModel is optional
-	// if set only one of its struct member should be provided
-	// Constructor > Creator
-	ViewModel struct {
-		// Knockout will invoke your constructor once for each instance of the component,
-		// producing a separate viewmodel object for each.
-		//
-		// 'params' is an object whose key/value pairs are the parameters
-		// passed from the component binding or custom element.
-		Constructor func(params *js.Object) ViewModel
-		// If you want to run any setup logic on the associated element before it is bound to the viewmodel,
-		// or use arbitrary logic to decide which viewmodel class to instantiate you can use VmCreator
-		Creator func(params *js.Object, info *ComponentInfo) ViewModel
-	}
+	// if set, only one of its struct member should be provided
+	// member checking seq: Constructor > Creator
+	ViewModel *ComponentVModelConfig
 	// Template must be provided
 	// and only one of its struct member should be provided
-	// Markup > Id > Instance
-	Template struct {
-		// A string of markup
-		Markup string
-		// An existing element ID
-		Id string
-		// An existing element instance
-		Instance *dom.Element
-	}
+	// member checking seq: Markup > Id > Instance
+	Template *ComponentTemplateConfig
 	// If your component configuration has a boolean synchronous property,
 	// Knockout uses this to determine whether the component is allowed to be loaded
 	// and injected synchronously.
 	Synchronous bool // The default is false
 	// optional sytle
-	// style would be embeded in style tag
+	// style would be embeded in <style></style> tag
 	Style string
 }
 
 func NewComponent(name string) *Component {
 	return &Component{
-		Name: name,
+		Name:      name,
+		ViewModel: new(ComponentVModelConfig),
+		Template:  new(ComponentTemplateConfig),
 	}
 }
 
 func (c *Component) viewModel() interface{} {
-	if c.ViewModel == nil {
-		return nil
-	}
 	if c.ViewModel.Constructor != nil {
 		return func(params *js.Object) *js.Object {
 			vm := c.ViewModel.Constructor(params)
@@ -373,12 +376,10 @@ func (c *Component) viewModel() interface{} {
 			},
 		}
 	}
+	return nil
 }
 
 func (c *Component) template() interface{} {
-	if c.Template == nil {
-		panic("Template must be provided for ko.Component")
-	}
 	if c.Template.Markup != "" {
 		return c.Template.Markup
 	}
@@ -387,24 +388,25 @@ func (c *Component) template() interface{} {
 			"element": c.Template.Id,
 		}
 	}
-	if c.Template.Instance != "" {
+	if c.Template.Instance != nil {
 		return js.M{
 			"element": c.Template.Instance,
 		}
 	}
+	panic("Template must be provided for ko.Component")
 }
 
-func rawRegister(name string, params js.M) {
+func rawRegisterComponent(name string, params js.M) {
 	ko().Get("components").Call("register", name, params)
 }
 
 func registerComponent(c *Component) {
 	if c.Style != "" {
 		style := dom.CreateElement("style")
-		style.InnerHTML = cssRules
+		style.InnerHTML = c.Style
 		dom.Body().AppendChild(style)
 	}
-	rawRegister(c.Name, js.M{
+	rawRegisterComponent(c.Name, js.M{
 		"template":    c.template(),
 		"viewModel":   c.viewModel(),
 		"synchronous": c.Synchronous,
@@ -420,32 +422,11 @@ func registerComponent(c *Component) {
 //  template is the html tempalte for the component
 //  cssRules would be directly embeded in the final html page, which can be ""
 func RegisterComponent(name string, vmCreator func(params *js.Object, info *ComponentInfo) ViewModel, template, cssRules string) {
-	// embed the cssRules
-	if cssRules != "" {
-		style := dom.CreateElement("style")
-		style.InnerHTML = cssRules
-		dom.Body().AppendChild(style)
-	}
-	// template only component
-	if vmCreator == nil {
-		rawRegister(name, js.M{
-			"template": template,
-		})
-		return
-	}
-	// register the component
-	rawRegister(name, js.M{
-		"viewModel": js.M{
-			"createViewModel": func(params *js.Object, info *ComponentInfo) *js.Object {
-				vm := vmCreator(params, info)
-				if vm != nil {
-					return vm.ToJS()
-				}
-				return nil
-			},
-		},
-		"template": template,
-	})
+	c := NewComponent(name)
+	c.ViewModel.Creator = vmCreator
+	c.Template.Markup = template
+	c.Style = cssRules
+	registerComponent(c)
 }
 
 type BindingContext struct {
