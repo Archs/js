@@ -408,7 +408,8 @@ func rawRegisterComponent(name string, params js.M) {
 	ko().Get("components").Call("register", name, params)
 }
 
-func registerComponent(c *Component) {
+// RegisterComponent is used to create KnockoutJS component with more options
+func RegisterComponent(c *Component) {
 	if c.Style != "" {
 		style := dom.CreateElement("style")
 		style.InnerHTML = c.Style
@@ -421,20 +422,15 @@ func registerComponent(c *Component) {
 	})
 }
 
-// RegisterComponent is an easy form to create KnockoutJS component
+// RegisterMarkupComponent is an easy form to create KnockoutJS component
 //  name is the component name
-//  vmCreator is the ViewModel creator with type: func(paramsMap *js.Object, info *ComponentInfo) (vm ViewModel)
-//     vmCreator can be nil which means template only component
-//     paramsMap is configured like:
-//     <ko-uploader params="uploadUrl:'/uploadUrl', text:'Browser', buttonCls:'button round expand', multiple:true"></ko-uploader>
-//  template is the html tempalte for the component
-//  cssRules would be directly embeded in the final html page, which can be ""
-func RegisterComponent(name string, vmCreator func(params *js.Object, info *ComponentInfo) ViewModel, template, cssRules string) {
+//  vmConstructor is the ViewModel Constructor
+//  markup is the html tempalte for the component
+func RegisterMarkupComponent(name, markup string, vmConstructor func(params *js.Object) ViewModel) {
 	c := NewComponent(name)
-	c.ViewModel.Creator = vmCreator
-	c.Template.Markup = template
-	c.Style = cssRules
-	registerComponent(c)
+	c.ViewModel.Constructor = vmConstructor
+	c.Template.Markup = markup
+	RegisterComponent(c)
 }
 
 type BindingContext struct {
