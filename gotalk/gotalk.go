@@ -32,15 +32,17 @@ type Handlers struct {
 	//   interface ReqValueHandler(any, ValueResult, op string)
 	HandleRequest       func(op string, ReqValueHandler interface{})  `js:"HandleRequest"`
 	HandleBufferRequest func(op string, ReqBufferHandler interface{}) `js:"handleBufferRequest"`
-	// Register a handler for notification `name`. Just as with request handlers,
+	// Register a handler for notification `op`. Just as with request handlers,
 	// registering a handler for the empty string means it's registered as the
 	// fallback handler.
 	//
-	//   interface NotValueHandler(any, name string)
-	//   handleNotification(name string, NotValueHandler)
+	//   interface NotValueHandler(any, op string)
+	//   handleNotification(op string, NotValueHandler)
 	HandleNotification func(op string, NotValueHandler interface{}) `js:"handleNotification"`
-	//   handleBufferNotification(name string, NotBufferHandler)
-	handleBufferNotification func(op string, NotBufferHandler interface{}) `js:"handleBufferNotification"`
+
+	// handleBufferNotification(op string, NotBufferHandler)
+	//   interface NotBufferHandler(Buf|string, op string)
+	HandleBufferNotification func(op string, NotBufferHandler interface{}) `js:"handleBufferNotification"`
 }
 
 //     type Sock prototypeof EventEmitter {
@@ -138,7 +140,7 @@ type Sock struct {
 	// }
 
 	// event handling
-	//     EvtOpen        func()
+	//     EvtOpen        func(*Sock)
 	//     EvtClose       func(Error)
 	//     EvtHeartBeat   func({time: Date, load: float})
 	AddListener        func(evtType string, fn interface{}) `js:"addListener"`
