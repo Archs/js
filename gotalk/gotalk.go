@@ -8,9 +8,10 @@ import (
 
 const (
 	// Sock event types
-	EvtOpen      = "open"
-	EvtClose     = "close"
-	EvtHeartBeat = "heartbeat"
+	EvtOpen         = "open"
+	EvtClose        = "close"
+	EvtHeartBeat    = "heartbeat"
+	EvtNotification = "notification"
 )
 
 var (
@@ -140,14 +141,15 @@ type Sock struct {
 	// }
 
 	// event handling
-	//     EvtOpen        func(*Sock)
-	//     EvtClose       func(Error)
-	//     EvtHeartBeat   func({time: Date, load: float})
-	AddListener        func(evtType string, fn interface{}) `js:"addListener"`
-	On                 func(evtType string, fn interface{}) `js:"on"`
-	Once               func(evtType string, fn interface{}) `js:"once"`
-	RemoveListener     func(evtType string, fn interface{}) `js:"removeListener"`
-	RemoveAllListeners func(evtType string)                 `js:"removeAllListeners"`
+	//     EvtOpen         func()
+	//     EvtClose        func(Error)
+	//     EvtHeartBeat    func({time: Date, load: float})
+	//     EvtNotification func(name, value)
+	AddListener        func(evtType string, fn interface{}) *Sock `js:"addListener"`
+	On                 func(evtType string, fn interface{}) *Sock `js:"on"`
+	Once               func(evtType string, fn interface{}) *Sock `js:"once"`
+	RemoveListener     func(evtType string, fn interface{}) *Sock `js:"removeListener"`
+	RemoveAllListeners func(evtType string)                       `js:"removeAllListeners"`
 
 	// Emit               func(evtType string)                 `js:"emit"`
 }
