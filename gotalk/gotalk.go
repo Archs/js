@@ -8,7 +8,7 @@ import (
 
 const (
 	// Sock event types
-	EvtOpen         = "open"
+	EvtOpen         = "open" // fired only when Sock is usable
 	EvtClose        = "close"
 	EvtHeartBeat    = "heartbeat"
 	EvtNotification = "notification"
