@@ -49,7 +49,7 @@ type Handlers struct {
 //     type Sock prototypeof EventEmitter {
 type Sock struct {
 	*js.Object
-	Handlers *Handlers `js:"Handlers"`
+	Handlers *Handlers `js:"handlers"`
 	//     type Sock prototypeof EventEmitter {
 	//   handlers ➝ Handlers    // default: defaultHandlers
 	//   protocol ⇄ ProtocolImp // default: protocol.binary
