@@ -46,6 +46,12 @@ type Handlers struct {
 	HandleBufferNotification func(op string, NotBufferHandler interface{}) `js:"handleBufferNotification"`
 }
 
+func NewHandlers() *Handlers {
+	return &Handlers{
+		Object: gotalk.Call("Handlers"),
+	}
+}
+
 //     type Sock prototypeof EventEmitter {
 type Sock struct {
 	*js.Object

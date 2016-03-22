@@ -91,3 +91,10 @@ func (m *KoMapping) Ignore(properties ...string) *KoMapping {
 func (m *KoMapping) Observe(properties ...string) *KoMapping {
 	return m.Option("observe", properties)
 }
+
+func (m *KoMapping) Reset() *KoMapping {
+	m.target = nil
+	m.options = nil
+	m.data = nil
+	return m
+}
