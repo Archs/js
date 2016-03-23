@@ -649,3 +649,11 @@ func ApplyBindings(vm ViewModel, el ...*dom.Element) {
 		ko().Call("applyBindings", vm.ToJS(), el[0])
 	}
 }
+
+func ToJS(obj interface{}) *js.Object {
+	return ko().Call("toJS", obj)
+}
+
+func ToJSON(obj interface{}) string {
+	return ko().Call("toJSON", obj).String()
+}
