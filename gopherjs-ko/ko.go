@@ -183,9 +183,13 @@ func (o *Observable) NotifyAlways() {
 
 // for observable array
 
-func NewObservableArray(data ...interface{}) *Observable {
-	if len(data) >= 1 {
-		return &Observable{ko().Call("observableArray", data[0])}
+// NewObservableArray create an ko observableArray with init datas as arguments
+// datas is only for initialization, and should not use array or slice directly
+// as argument, when array or slice is really needed, use Push/Unshift to populdate
+// the observableArray item by item
+func NewObservableArray(datas ...interface{}) *Observable {
+	if len(datas) >= 1 {
+		return &Observable{ko().Call("observableArray", datas)}
 	}
 	return &Observable{ko().Call("observableArray")}
 }
