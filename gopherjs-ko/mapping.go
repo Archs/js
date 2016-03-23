@@ -18,12 +18,12 @@ type KoMapping struct {
 
 func Mapping() *KoMapping {
 	if defaultMapping == nil {
-		defaultMapping = NewKoMapping()
+		defaultMapping = NewMapping()
 	}
 	return defaultMapping
 }
 
-func NewKoMapping() *KoMapping {
+func NewMapping() *KoMapping {
 	m := &KoMapping{
 		Object: Get("mapping"),
 	}
