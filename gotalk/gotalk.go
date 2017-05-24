@@ -223,3 +223,25 @@ func HandleBufferRequest(op string, ReqBufferHandler interface{}) {
 func HandleBufferNotification(op string, NotBufferHandler interface{}) {
 	gotalk.Call("handleBufferNotification", op, NotBufferHandler)
 }
+
+// Result is a wrapper for result and result.error
+type Result struct {
+	r *js.Object
+}
+
+// wrapper to support result and result.error
+func WrapResult(r *js.Object) Result {
+	return Result{
+		r: r,
+	}
+}
+
+// result(any)
+func (r Result) Result(args ...interface{}) {
+	r.r.Invoke(args...)
+}
+
+// result.error(any)
+func (r Result) Error(args ...interface{}) {
+	r.r.Get("error").Invoke(args...)
+}
